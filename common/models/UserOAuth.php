@@ -49,13 +49,11 @@ class UserOAuth extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['profile_id', 'user_id', 'client_id', 'social_id', 'access_token'], 'required'],
-            [['profile_id', 'created_at', 'updated_at', 'status'], 'integer'],
+            [['user_id', 'client_id', 'social_id', 'access_token'], 'required'],
+            [['created_at', 'updated_at'], 'integer'],
             [['access_token'], 'string'],
             [['client_id'], 'string', 'max' => 20],
-            ['profile_id', 'exist', 'targetClass' => '\common\models\UserProfile', 'targetAttribute' => 'id'],
-            ['user_id', 'exist', 'targetClass' => '\common\models\User', 'targetAttribute' => 'id'],
-            ['status', 'default', 'value' => self::STATUS_ACTIVE]
+            ['user_id', 'exist', 'targetClass' => '\common\models\User', 'targetAttribute' => 'id']
         ];
     }
 

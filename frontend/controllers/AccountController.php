@@ -17,6 +17,7 @@ use frontend\models\PasswordResetForm;
 use frontend\models\RequestPasswordForm;
 use frontend\models\RequestVerifyForm;
 use frontend\models\SignupForm;
+use yii\authclient\ClientInterface;
 use yii\flash\Flash;
 use yii\authclient\BaseClient;
 use yii\filters\AccessControl;
@@ -59,7 +60,7 @@ class AccountController extends Controller
             [
                 "class" => LayoutsBehavior::className(),
                 "layouts" => [
-                    'authorize' => ['login', 'signup', 'auth-signup', 'password-request', 'activate-request'],
+                    'authorize' => ['login', 'signup', 'auth-signup', 'request-password', 'request-verify'],
                     'account' => ['index', 'emails', 'settings', 'change-login', 'profile'],
                 ]
             ]
@@ -121,15 +122,17 @@ class AccountController extends Controller
 
     public function actionAuthSignup()
     {
+        Yii::$app->user->setReturnUrl(Yii::$app->request->get('ref'));
         $model = new AuthSignupForm();
         if ($model->load(Yii::$app->request->post())) {
             if ($model->signup()) {
+                Yii::$app->session->remove('authorize');
                 Flash::alert(Flash::ALERT_SUCCESS, 'Your account has been initialized.');
                 $this->goBack();
                 Yii::$app->end();
             }
         }
-        return $this->render('authSignup', [
+        return $this->render('signup-auth', [
             'model' => $model,
         ]);
     }
@@ -333,15 +336,17 @@ class AccountController extends Controller
             return $model->getResponse();
         }
     }
+
     public function actionPictureCrop()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $model = new CropModel();
         if ($model->load(Yii::$app->request->post()) && $model->crop()) {
-            Yii::$app->user->identity->userProfile->updateAttributes(['picture'=>$model->getUrl()]);
+            Yii::$app->user->identity->userProfile->updateAttributes(['picture' => $model->getUrl()]);
             return $model->getResponse();
         }
     }
+
     public function profileUpdate()
     {
         $model = Yii::$app->user->identity->userProfile;
@@ -383,43 +388,100 @@ class AccountController extends Controller
     }
 
     /**
-     * @param $client
+     * @param UserProfile $profile
+     * @param array $attributes
+     * @param bool $replace
+     * @return bool
      */
-    public function authorizeCallback(BaseClient $client)
+    public function updateProfileFields(UserProfile $profile, $attributes, $replace = false)
     {
-        $userAttributes = $client->userAttributes;
-        $userOAuth = UserOAuth::findOne(['social_id' => $userAttributes['id']]);
-        if (!$userOAuth) {
-            if (isset($userAttributes['email'])) {
-                $userEmail = UserEmail::findOne(['email' => $userAttributes['email']]);
-                if ($userEmail) {
-                    $user = $userEmail->user;
-                    $userProfile = new UserProfile();
-                    $userProfile->attributes = $userAttributes;
-                    $userProfile->user_id = $user->id;
-                    if ($userProfile->save()) {
-                        (new UserOAuth([
-                            'user_id' => $user->id,
-                            'profile_id' => $userProfile->id,
-                            'client_id' => $client->id,
-                            'social_id' => $userAttributes['id'],
-                            'access_token' => serialize($client->getAccessToken())
-                        ]))->save();
-                    }
+        if ($replace) {
+            $profile->attributes = $attributes;
+        } else {
+            foreach ($attributes as $attribute => $value) {
+                if ($profile->hasAttribute($attribute) && empty($profile->{$attribute})) {
+                    $profile->setAttribute($attribute, $value);
                 }
             }
-        } else {
-            $userOAuth->userProfile->attributes = $userAttributes;
-            $userOAuth->userProfile->save();
-            $user = $userOAuth->userProfile->user;
         }
-        if (isset($user) && !is_null($user)) {
-            $user->login(true);
+        return $profile->save() !== false;
+    }
+
+    /**
+     * @param ClientInterface $client
+     */
+    public function authorizeCallback(ClientInterface $client)
+    {
+        $requiredSignUp = false;
+        $userAttributes = $client->userAttributes;
+        //print_r($userAttributes);
+        //die();
+        if (Yii::$app->user->isGuest) {
+            if (is_null($userOAuth = UserOAuth::findOne(['social_id' => $userAttributes['id']]))) {
+                if (ArrayHelper::keyExists('email', $userAttributes)) {
+                    if (!is_null($userEmail = UserEmail::findOne(['email' => $userAttributes['email']]))) {
+                        $user = $userEmail->user;
+                        if (!is_null($user->userLogin)) {
+                            ArrayHelper::remove($userAttributes, 'email');
+                            $this->updateProfileFields($user->userProfile, $userAttributes);
+                            (new UserOAuth([
+                                'user_id' => $user->id,
+                                'client_id' => $client->id,
+                                'social_id' => $userAttributes['id'],
+                                'access_token' => serialize($client->accessToken)
+                            ]))->save();
+                        } else {
+                            $requiredSignUp = true;
+                        }
+                    } else {
+                        $requiredSignUp = true;
+                    }
+                } else {
+                    $requiredSignUp = true;
+                }
+                if ($requiredSignUp) {
+                    Yii::$app->session->set('authorize', [
+                        'clientId' => $client->id,
+                        'attributes' => $userAttributes,
+                        'accessToken' => $client->accessToken
+                    ]);
+                    Yii::$app->user->setReturnUrl(['/account/auth-signup', 'ref' => Yii::$app->user->getReturnUrl()]);
+                }
+            } else {
+                $user = $userOAuth->user;
+                $userOAuth->access_token = serialize($client->accessToken);
+                $userOAuth->save();
+                $this->updateProfileFields($user->userProfile, $userAttributes);
+            }
+            if (isset($user) && !is_null($user)) {
+                $user->login(true);
+            }
         } else {
-            Yii::$app->session->set('_authAttributes', $userAttributes);
-            Yii::$app->session->set('_accessToken', $client->getAccessToken());
-            Yii::$app->session->set('_clientId', $client->id);
-            Yii::$app->user->setReturnUrl(['/account/auth-signup']);
+            $user_id = Yii::$app->user->id;
+            if (!is_null($userOAuth = UserOAuth::findOne(['social_id' => $userAttributes['id']]))) {
+                if ($userOAuth->user_id != $user_id) {
+                    Flash::alert('danger', 'This social profile exist on another account');
+
+                } else {
+                    $userOAuth->updateAttributes(['access_token' => serialize($client->accessToken)]);
+                }
+            } else {
+                if (ArrayHelper::keyExists('email', $userAttributes)) {
+                    if (!is_null($userEmail = UserEmail::findOne(['email' => $userAttributes['email']])) && $userEmail->user_id != $user_id) {
+                        Flash::alert('danger', "This email {$userAttributes['email']} exist on another account");
+                    } else {
+                        (new UserEmail(['email' => $userAttributes['email'], 'user_id' => $user_id]))->save();
+                    }
+                }
+                ArrayHelper::remove($userAttributes, 'email');
+                $this->updateProfileFields(Yii::$app->user->identity->userProfile, $userAttributes);
+                (new UserOAuth([
+                    'user_id' => $user_id,
+                    'client_id' => $client->id,
+                    'social_id' => $userAttributes['id'],
+                    'access_token' => serialize($client->accessToken)
+                ]))->save();
+            }
         }
     }
 }

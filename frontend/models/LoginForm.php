@@ -58,8 +58,6 @@ class LoginForm extends Model
                 $this->addError($attribute, 'You account was not found.');
             } elseif ($this->getUser()->role == User::ROLE_BANNED) {
                 $this->addError($attribute, 'You account has been banned.');
-            } elseif ($this->getUser()->status == User::STATUS_DELETE) {
-                $this->addError($attribute, 'You account has been deleted.');
             } elseif (is_null($this->getUser()->userLogin)) {
                 $this->addError($attribute, 'This email can login via social network.');
             }

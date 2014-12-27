@@ -21,12 +21,7 @@ use yii\bootstrap\Nav;
                     'items' => [
                         ['label' => 'Profile settings', 'url' => ['/account/profile']],
                         ['label' => 'Account  settings', 'url' => ['/account/settings']],
-                        ['label' => 'Emails  settings', 'url' => ['/account/emails']],
-                        ['label' => 'Create Login', 'url' => ['/account/create-login']],
-                        ['label' => 'Change Login', 'url' => ['/account/change-login']],
-                        ['label' => 'Change Password', 'url' => ['/account/change-password']],
-
-                    ]
+                        ['label' => 'Emails  settings', 'url' => ['/account/emails']],                    ]
                 ]); ?>
             </div>
         </div>

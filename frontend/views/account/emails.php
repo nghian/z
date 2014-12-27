@@ -24,7 +24,7 @@ $this->title = 'Emails Settings';
                         <?php endif ?>
                         <span class="pull-right">
                         <?php if (!$email->verified): ?>
-                            <?= Html::a($email->verify_reset_token != null ? 'Resend verification link' : 'Verify', ['/account/email-verify', 'email' => $email->email], ['class' => 'btn btn-warning btn-xs']); ?>
+                            <?= Html::a($email->verify_token != null ? 'Resend verification link' : 'Verify', ['/account/email-verify', 'email' => $email->email], ['class' => 'btn btn-warning btn-xs']); ?>
                         <?php endif ?>
                         <?php if (!$email->isPrimary && $email->verified): ?>
                             <?= Html::a('Set Primary', ['/account/email-primary', 'email' => $email->email], ['class' => 'btn btn-primary btn-xs']); ?>

@@ -14,8 +14,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $user_id
  * @property integer $priority
  * @property integer $verified
- * @property string $verify_reset_token
- * @property integer $status
+ * @property string $verify_token
  *
  * Relations
  * @property User $user
@@ -30,8 +29,6 @@ class UserEmail extends \yii\db\ActiveRecord
     const PRIORITY_NONE = 0;
     const VERIFIED = 1;
     const UNVERIFIED = 0;
-    const STATUS_ACTIVE = 1;
-    const STATUS_DELETE = 0;
 
     /**
      * @inheritdoc
@@ -48,13 +45,12 @@ class UserEmail extends \yii\db\ActiveRecord
     {
         return [
             [['email', 'user_id'], 'required'],
-            [['user_id', 'priority', 'verified', 'status'], 'integer'],
+            [['user_id', 'priority', 'verified'], 'integer'],
             [['user_id'], 'exist', 'targetClass' => '\common\models\User', 'targetAttribute' => 'id'],
-            [['email', 'verify_reset_token'], 'string', 'max' => 100],
+            [['email', 'verify_token'], 'string', 'max' => 100],
             ['email', 'email'],
             ['priority', 'default', 'value' => self::PRIORITY_NONE],
             ['verified', 'default', 'value' => self::UNVERIFIED],
-            ['status', 'default', 'value' => self::STATUS_ACTIVE]
         ];
     }
 
@@ -68,7 +64,6 @@ class UserEmail extends \yii\db\ActiveRecord
             'user_id' => Yii::t('app', 'User ID'),
             'priority' => Yii::t('app', 'Priority'),
             'verified' => Yii::t('app', 'Verify'),
-            'status' => Yii::t('app', 'Status'),
         ];
     }
 
@@ -93,23 +88,23 @@ class UserEmail extends \yii\db\ActiveRecord
 
     public static function findByResetToken($resetToken)
     {
-        return static::findOne(['verify_reset_token' => $resetToken]);
+        return static::findOne(['verify_token' => $resetToken]);
     }
 
     /**
-     * Generates new value for verify_reset_token
+     * Generates new value for verify_token
      */
     public function setResetToken()
     {
-        $this->verify_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
+        $this->verify_token = Yii::$app->security->generateRandomString() . '_' . time();
     }
 
     /**
-     * Removes value verify_reset_token
+     * Removes value verify_token
      */
     public function unsetResetToken()
     {
-        $this->verify_reset_token = null;
+        $this->verify_token = null;
     }
 
     public function primary()

@@ -1,13 +1,11 @@
 <?php
+/* @var $this \yii\web\View */
+/* @var $content string */
 use yii\helpers\Html;
 use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use frontend\assets\AppAsset;
-use frontend\assets\FontAwesomeAsset;
 
-/* @var $this \yii\web\View */
-/* @var $content string */
-FontAwesomeAsset::register($this);
 AppAsset::register($this);
 ?>
 <?php $this->beginPage() ?>
@@ -22,35 +20,44 @@ AppAsset::register($this);
 </head>
 <body>
 <?php $this->beginBody() ?>
-<div class="wrap">
-    <?php
-    NavBar::begin([
-        'brandLabel' => 'PHPrestfull',
-        'brandUrl' => Yii::$app->homeUrl,
-        'options' => [
-            'class' => 'navbar-fw navbar-default',
-        ],
-    ]);
-    echo Nav::widget([
-        'options' => ['class' => 'navbar-nav navbar-right'],
-        'encodeLabels' => false,
-        'items' => [
-            ['label' => Html::tag('span', null, ['class' => 'fa fa-plus']) . ' Sign Up', 'url' => ['/account/signup']],
-            ['label' => Html::tag('span', null, ['class' => 'fa fa-sign-in']) . ' Sign In', 'url' => ['/account/login']]
-        ]
-    ]);
-    NavBar::end();
-    ?>
+<div class="wrapper">
+    <nav class="navbar navbar-ps navbar-static-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="psi-menu"></span>
+                </button>
+                <a class="navbar-brand" href="/">
+                    <span class="psi-brand"></span>
+                </a>
+            </div>
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="navbar-link-btn navbar-right">
+                    <?php if (Yii::$app->controller->action->id != 'signup'): ?>
+                        <li>
+                            <a class="btn btn-success" href="/account/signup"><span class="psi-person-plus"></span> Sign Up</a>
+                        </li>
+                    <?php endif; ?>
+                    <?php if (Yii::$app->controller->action->id != 'login'): ?>
+                        <li>
+                            <a class="btn btn-default" href="/account/login"><span class="psi-lock-open"></span> Sign In</a>
+                        </li>
+                    <?php endif; ?>
+                </ul>
+            </div>
+        </div>
+    </nav>
     <div class="container">
         <?= $content ?>
     </div>
 </div>
-<footer class="footer">
+<div class="footer">
     <div class="container">
-        <p class="pull-left">&copy; My Company <?= date('Y') ?></p>
-        <p class="pull-right"><?= Yii::powered() ?></p>
+        <div>&copy; <?= date('Y') ?> www.phpsyntax.com</div>
     </div>
-</footer>
+</div>
+
 <?php $this->endBody() ?>
 </body>
 </html>

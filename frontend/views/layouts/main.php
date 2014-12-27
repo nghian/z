@@ -6,9 +6,10 @@ use yii\widgets\Breadcrumbs;
 use frontend\assets\AppAsset;
 use frontend\assets\FontAwesomeAsset;
 use yii\flash\Alert;
+
 /* @var $this \yii\web\View */
 /* @var $content string */
-FontAwesomeAsset::register($this);
+//FontAwesomeAsset::register($this);
 AppAsset::register($this);
 
 ?>
@@ -24,38 +25,42 @@ AppAsset::register($this);
     </head>
     <body>
     <?php $this->beginBody() ?>
-    <div class="wrap">
+    <div class="wrapper">
         <?php
         NavBar::begin([
-            'brandLabel' => 'PHP RESTFUL',
+            'brandLabel' => Html::tag('span', null, ['class' => 'psi-brand']),
             'brandUrl' => Yii::$app->homeUrl,
             'options' => [
-                'class' => 'navbar-default navbar-fw',
+                'class' => 'navbar navbar-ps navbar-static-top',
+            ],
+        ]);
+        echo Nav::widget([
+            'options' => ['class' => 'navbar-nav'],
+            'encodeLabels' => false,
+            'items' => [
+                ['label' => '<span class="psi-file-text"></span> Tutorials', 'url' => ['article/index']],
+                ['label' => '<span class="psi-question-answer"></span> Q & A', 'url' => ['qa/index']],
             ],
         ]);
         $menuItems = [];
         if (Yii::$app->user->isGuest) {
-            $menuItems[] = ['label' => Html::tag('span', null, ['class' => 'fa fa-plus']) . ' Sign Up', 'url' => ['/account/signup']];
-            $menuItems[] = ['label' => Html::tag('span', null, ['class' => 'fa fa-sign-in']) . ' Sign In', 'url' => ['/account/login']];
+            $menuItems[] = ['label' => Html::tag('span', null, ['class' => 'psi-person-plus']) . ' Sign Up', 'url' => ['/account/signup']];
+            $menuItems[] = ['label' => Html::tag('span', null, ['class' => 'psi-lock-open']) . ' Sign In', 'url' => ['/account/login']];
         } else {
             $menuItems[] = [
-                'label' => Html::tag('span', null, ['class' => 'glyphicon glyphicon-user']) . ' ' . Yii::$app->user->identity->userProfile->first_name,
+                'label' => Html::tag('span', null, ['class' => 'psi-person']) . ' ' . Yii::$app->user->identity->name,
                 'url' => Yii::$app->user->identity->url
             ];
             $menuItems[] = [
-                'label' => Html::tag('span', null, ['class' => 'fa fa-users']),
+                'label' => Html::tag('span', null, ['class' => 'psi-notifications-none']),
                 'url' => ['#']
             ];
             $menuItems[] = [
-                'label' => Html::tag('span', null, ['class' => 'fa fa-bell-o']),
-                'url' => ['#']
-            ];
-            $menuItems[] = [
-                'label' => Html::tag('span', null, ['class' => 'fa fa-cogs']),
+                'label' => Html::tag('span', null, ['class' => 'psi-settings']),
                 'url' => ['/account/profile']
             ];
             $menuItems[] = [
-                'label' => Html::tag('span', null, ['class' => 'fa fa-sign-out']),
+                'label' => Html::tag('span', null, ['class' => 'psi-exit']),
                 'url' => ['/account/logout'],
                 'linkOptions' => ['data-method' => 'post']
             ];
@@ -69,22 +74,21 @@ AppAsset::register($this);
         ?>
 
         <div class="container">
+            <?= Alert::widget() ?>
             <?= Breadcrumbs::widget([
                 'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
             ]) ?>
-            <?= Alert::widget() ?>
             <?= $content ?>
         </div>
     </div>
 
-    <footer class="footer">
+    <div class="footer">
         <div class="container">
             <p class="pull-left">&copy; phprestful.com <?= date('Y') ?></p>
 
             <p class="pull-right"><?= Yii::powered() ?></p>
         </div>
-    </footer>
-
+    </div>
     <?php $this->endBody() ?>
     </body>
     </html>

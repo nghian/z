@@ -1,48 +1,45 @@
 <?php
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
-use yii\authclient\widgets\AuthChoice;
+use frontend\widgets\AuthChoice;
 
 /* @var $this yii\web\View */
 /* @var $form yii\bootstrap\ActiveForm */
-/* @var $model      frontend\models\LoginForm */
-
-$this->title = 'Login';
-$this->params['breadcrumbs'][] = $this->title;
+/* @var $model frontend\models\LoginForm */
+$this->title = "Login - phpSyntax";
 ?>
-<div class="site-login">
-    <h1 class="page-header"><span class="fa fa-sign-in text-primary"></span> <?= Html::encode($this->title) ?></h1>
-
+<div class="account-login vertical-center">
     <div class="row">
-        <div class="col-lg-4">
-            <p>Please fill out the following fields to login:</p>
-            <?php $form = ActiveForm::begin(['id' => 'login-form']); ?>
-            <?= $form->field($model, 'login', ['template' => '<div class="input-group"><span class="input-group-addon"><i class="fa fa-at text-primary"></i></span>{input}</div>{error}'])->textInput(['placeholder' => 'Email or Username']) ?>
-            <?= $form->field($model, 'password', ['template' => '<div class="input-group"><span class="input-group-addon"><i class="fa fa-key text-primary"></i></span>{input}</div>{error}'])->passwordInput(['placeholder' => 'Password']) ?>
-            <?= $form->field($model, 'rememberMe')->checkbox() ?>
-            <div style="color:#999;margin:1em 0">
-                If you forgot your password you can <?= Html::a('reset it', ['account/request-password']) ?>.
-                <br/>
-                If your account unverified you can <?= Html::a('verify it', ['account/request-verify']) ?>.
+        <div class="col-lg-4 col-md-5 col-sm-6 col-center">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Sign In</h3>
+                </div>
+                <div class="panel-body">
+                    <?php $auth = AuthChoice::begin([
+                        'clientCollection' => 'oauth',
+                        'clientIdGetParamName' => 'client',
+                        'baseAuthUrl' => ['account/authorize']
+                    ]) ?>
+                    <ul class="auth-clients">
+                        <?php foreach ($auth->getClients() as $client): ?>
+                            <li class="auth-client">
+                                <?= Html::a(Html::tag('span', null, ['class' => 'psi psi-' . $client->id]), $auth->createClientUrl($client), ['class' => 'btn btn-social-icon btn-' . $client->id]); ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <?php AuthChoice::end(); ?>
+                </div>
+                <div class="panel-body">
+                    <?php $form = ActiveForm::begin(['id' => 'login-form']); ?>
+                    <?= $form->field($model, 'login', ['template' => '<div class="input-group"><span class="input-group-addon"><i class="psi-person"></i></span>{input}</div>{error}'])->textInput(['placeholder' => 'Username or Email']) ?>
+                    <?= $form->field($model, 'password', ['template' => '<div class="input-group"><span class="input-group-addon"><i class="psi-key"></i></span>{input}</div>{error}'])->passwordInput(['placeholder' => 'Password']) ?>
+                    <?= $form->field($model, 'rememberMe')->checkbox() ?>
+                    <?= Html::submitButton('Login', ['class' => 'btn btn-default', 'name' => 'login-button']) ?>
+                    <a class="btn btn-link" href="/account/request-password" title="Forgot your password">Reset password</a>
+                    <?php ActiveForm::end(); ?>
+                </div>
             </div>
-            <div class="form-group">
-                <?= Html::submitButton('Login', ['class' => 'btn btn-primary', 'name' => 'login-button']) ?>
-            </div>
-            <?php ActiveForm::end(); ?>
-        </div>
-        <div class="col-lg-7">
-            <p>Login via social network:</p>
-            <?php $auth = AuthChoice::begin([
-                'clientCollection' => 'oauth',
-                'clientIdGetParamName' => 'client',
-                'baseAuthUrl' => ['account/authorize']
-            ]) ?>
-            <ul class="list-unstyled list-inline">
-                <?php foreach ($auth->getClients() as $client): ?>
-                    <li class="auth-client"><?= $auth->clientLink($client); ?></li>
-                <?php endforeach; ?>
-            </ul>
-            <?php AuthChoice::end(); ?>
         </div>
     </div>
 </div>

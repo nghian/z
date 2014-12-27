@@ -8,8 +8,6 @@ return [
             'clientSecret' => 'lyPxSQHvbrrY6iUPcz9DQCwI',
             'normalizeUserAttributeMap' => [
                 'email' => ['emails', '0', 'value'],
-                'first_name' => ['name', 'givenName'],
-                'last_name' => ['name', 'familyName'],
                 'name' => 'displayName',
                 'verified' => function ($response) {
                     return intval($response['verified']);
@@ -27,15 +25,8 @@ return [
             'clientId' => 'f14d2b85548573f534f6',
             'clientSecret' => '717a65f0d3bd8788c677cddec9ab699cdf1f8c2d',
             'normalizeUserAttributeMap' => [
-                'username' => 'login',
                 'picture' => 'avatar_url',
                 'website' => 'blog',
-                'first_name' => function ($response) {
-                    return array_shift(array_values(explode(' ', $response['name'])));
-                },
-                'last_name' => function ($response) {
-                    return end(explode(' ', $response['name']));
-                },
                 'created_at' => function ($response) {
                     return strtotime($response['created_at']);
                 },
@@ -50,6 +41,7 @@ return [
             'clientSecret' => 'fa5685f1c9b6b5e13c8efec3eea2f658',
             'scope' => 'email public_profile user_about_me read_stream publish_actions',
             'normalizeUserAttributeMap' => [
+                'location' => ['hometown', 'name'],
                 'locale' => function ($response) {
                     return array_shift(array_values(explode('_', $response['locale'])));
                 },
@@ -69,23 +61,13 @@ return [
             'consumerKey' => '8nOKPhsCQw04x5keX0fO0zT4f',
             'consumerSecret' => 'GIycUMi0wWhexQEJ13cVF58ZXU6IXdHqatQYjC8lu5Pt5Kcwd8',
             'normalizeUserAttributeMap' => [
-                'username' => 'screen_name',
                 'bio' => 'description',
                 'locale' => 'lang',
                 'picture' => 'profile_image_url',
                 'website' => 'url',
-                'first_name' => function ($response) {
-                    return array_shift(array_values(explode(' ', $response['name'])));
-                },
-                'last_name' => function ($response) {
-                    return end(explode(' ', $response['name']));
-                },
-                'verified' => function ($response) {
-                    return intval($response['verified']);
-                },
-                'created_at' => function ($response) {
-                    return strtotime($response['created_at']);
-                },
+                'created_at' => function ($r) {
+                    return isset($r['created_at']) ? strtotime($r['created_at']) : time();
+                }
             ]
         ],
         'linkedin' => [
@@ -95,13 +77,14 @@ return [
             'scope' => 'r_basicprofile r_fullprofile r_emailaddress r_contactinfo',
             'normalizeUserAttributeMap' => [
                 'email' => 'email-address',
-                'first_name' => 'first-name',
-                'last_name' => 'last-name',
-                'picture'=>'picture-url',
-                'bio'=>'headline',
-                'location'=>'main-address',
-                'birthday'=>function($attributes){
-                    return $attributes['date-of-birth']['year'].'-'.$attributes['date-of-birth']['month'].'-'.$attributes['date-of-birth']['day'];
+                'name' => function ($r) {
+                    return $r['first-name'] . ' ' . $r['last-name'];
+                },
+                'picture' => 'picture-url',
+                'bio' => 'headline',
+                'location' => 'main-address',
+                'birthday' => function ($attributes) {
+                    return $attributes['date-of-birth']['year'] . '-' . $attributes['date-of-birth']['month'] . '-' . $attributes['date-of-birth']['day'];
                 }
             ]
         ],

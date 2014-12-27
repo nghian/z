@@ -24,7 +24,9 @@ class RequestVerifyForm extends Model
     {
         return [
             [['email'], 'required'],
+            ['email', 'email'],
             ['email', 'exist', 'targetClass' => '\common\models\UserEmail', 'targetAttribute' => 'email']
+
         ];
     }
 

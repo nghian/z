@@ -1,7 +1,6 @@
 <?php
 namespace frontend\models;
 
-use common\models\User;
 use common\models\UserEmail;
 use common\models\UserLogin;
 use yii\validators\EmailValidator;
@@ -54,8 +53,6 @@ class RequestPasswordForm extends Model
         if (!$this->hasErrors()) {
             if (is_null($this->getUser())) {
                 $this->addError($attribute, 'You account was not found.');
-            } elseif ($this->getUser()->status == User::STATUS_DELETE) {
-                $this->addError($attribute, 'You account has been deleted.');
             } elseif (is_null($this->getUser()->userLogin)) {
                 $this->addError($attribute, 'You account login not exist. This email can login via socials network');
             }

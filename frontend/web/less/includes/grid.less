@@ -1,0 +1,46 @@
+html,
+body {
+    height: 100%;
+}
+
+.wrapper {
+    min-height: 100%;
+    height: auto;
+    margin: 0 auto -60px;
+    padding: 0 0 60px;
+}
+
+.footer {
+    height: 60px;
+    background-color: #fff;
+    border-top: 1px solid darken(@well-bg, 7%);;
+    padding-top: 20px;
+}
+
+.prepend {
+    margin-top: @line-height-computed;
+
+}
+
+.append {
+    margin-bottom: @line-height-computed;
+}
+
+.col-center {
+    float: none !important;
+    margin: 0 auto;
+}
+
+.relative {
+    position: relative;
+}
+
+.vertical-center {
+    min-height: 100%;
+    height: 100%;
+    position: relative;
+    top: 50%;
+    -webkit-transform: translateY(25%);
+    -ms-transform: translateY(25%);
+    transform: translateY(25%);
+}

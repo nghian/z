@@ -10,14 +10,11 @@ use Yii;
  * @property integer $user_id
  * @property string $username
  * @property string $password_hash
- * @property string $password_reset_token
- * @property boolean $status
+ * @property string $password_token
  */
 class UserLogin extends \yii\db\ActiveRecord
 {
     use UserRelationTrait;
-    const STATUS_ACTIVE = 1;
-    const STATUS_DELETE = 0;
 
     /**
      * @inheritdoc
@@ -38,8 +35,7 @@ class UserLogin extends \yii\db\ActiveRecord
             [['user_id', 'username'], 'unique'],
             [['user_id'], 'exist', 'targetClass' => '\common\models\User', 'targetAttribute' => 'id'],
             [['username'], 'string', 'max' => 32],
-            [['password_hash', 'password_reset_token'], 'string', 'max' => 100],
-            ['status', 'default', 'value' => self::STATUS_ACTIVE]
+            [['password_hash', 'password_token'], 'string', 'max' => 100],
         ];
     }
 
@@ -62,7 +58,7 @@ class UserLogin extends \yii\db\ActiveRecord
      */
     public static function findByResetToken($resetToken)
     {
-        return static::findOne(['password_reset_token' => $resetToken]);
+        return static::findOne(['password_token' => $resetToken]);
     }
 
     /**
@@ -92,7 +88,7 @@ class UserLogin extends \yii\db\ActiveRecord
      */
     public function setResetToken()
     {
-        $this->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
+        $this->password_token = Yii::$app->security->generateRandomString() . '_' . time();
     }
 
     /**
@@ -100,7 +96,7 @@ class UserLogin extends \yii\db\ActiveRecord
      */
     public function unsetResetToken()
     {
-        $this->password_reset_token = null;
+        $this->password_token = null;
     }
 
 

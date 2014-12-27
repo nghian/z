@@ -9,6 +9,6 @@ trait UserRelationTrait
      */
     public function getUser()
     {
-        return $this->hasOne(User::className(), ['id' => 'user_id'])->andWhere(['status' => User::STATUS_ACTIVE]);
+        return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 }

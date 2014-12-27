@@ -4,7 +4,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model common\models\User */
 
-$resetLink = Yii::$app->urlManager->createAbsoluteUrl(['account/password-reset', 'token' => $model->userLogin->password_reset_token]);
+$resetLink = Yii::$app->urlManager->createAbsoluteUrl(['account/password-reset', 'token' => $model->userLogin->password_token]);
 ?>
 
 Hello <strong><?= Html::encode($model->name) ?></strong>,

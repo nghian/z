@@ -2,12 +2,15 @@
 
 namespace frontend\controllers;
 
+use common\components\YoutubeInfo;
 use common\models\VideoCategory;
 use common\models\VideoItem;
 use common\models\VideoPlaylist;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
+use Yii;
 
 
 class VideoController extends Controller
@@ -33,6 +36,12 @@ class VideoController extends Controller
             'model' => $model,
             'dataProvider' => $dataProvider
         ]);
+    }
+
+    public function actionPlayback($id)
+    {
+        $model = $this->getItem($id);
+        return $this->renderPartial('playback', ['item' => (new YoutubeInfo(['id' => $model->file]))->fetch]);
     }
 
     public function actionPlaylist($id)
@@ -66,6 +75,11 @@ class VideoController extends Controller
 
     }
 
+    /**
+     * @param $id
+     * @return VideoItem|null
+     * @throws NotFoundHttpException
+     */
     protected function getItem($id)
     {
         $model = VideoItem::findOne($id);

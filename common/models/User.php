@@ -18,9 +18,9 @@ use Yii;
  * @property integer $id
  * @property string $role
  * @property string $auth_key
+ * @property integer $last_login
  * @property integer $created_at
  * @property integer $updated_at
- * @property integer $status
  *
  * Properties for get relations
  * @property UserEmail[] $userEmails
@@ -55,8 +55,6 @@ class User extends ActiveRecord implements IdentityInterface
     const ROLE_MANAGER = 3;
     const ROLE_ADMIN = 4;
     const ROLE_BANNED = 5;
-    const STATUS_ACTIVE = 1;
-    const STATUS_DELETE = 0;
 
     /**
      * @inheritdoc
@@ -90,7 +88,6 @@ class User extends ActiveRecord implements IdentityInterface
                 self::ROLE_ADMIN,
                 self::ROLE_BANNED
             ]],
-            ['status', 'default', 'value' => self::STATUS_ACTIVE],
             [['auth_key'], 'string', 'max' => 60]
         ];
     }
@@ -106,7 +103,6 @@ class User extends ActiveRecord implements IdentityInterface
             'auth_key' => 'Auth Key',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
-            'status' => 'Status',
         ];
     }
 
@@ -115,7 +111,6 @@ class User extends ActiveRecord implements IdentityInterface
         return $this->hasOne(UserEmail::className(), ['user_id' => 'id'])
             ->andWhere([
                 'priority' => UserEmail::PRIORITY_PRIMARY,
-                'status' => UserEmail::STATUS_ACTIVE
             ]);
     }
 
@@ -140,11 +135,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function getUserProfile()
     {
-        return $this->hasOne(UserProfile::className(), ['user_id' => 'id'])
-            ->andWhere([
-                'priority' => UserProfile::PRIORITY_PRIMARY,
-                'status' => UserProfile::STATUS_ACTIVE
-            ]);
+        return $this->hasOne(UserProfile::className(), ['user_id' => 'id']);
     }
 
     /**
@@ -158,12 +149,7 @@ class User extends ActiveRecord implements IdentityInterface
     public function getUserFollowers()
     {
         return $this->hasMany(self::className(), ['id' => 'user_id'])
-            ->viaTable(UserFollow::tableName(), ['follow_id' => 'id'],
-                function ($query) {
-                    /* @var $query ActiveQuery */
-                    return $query->andWhere(['status' => UserFollow::STATUS_ACTIVE]);
-                }
-            );
+            ->viaTable(UserFollow::tableName(), ['follow_id' => 'id']);
     }
 
     /**
@@ -172,12 +158,7 @@ class User extends ActiveRecord implements IdentityInterface
     public function getUserFollowing()
     {
         return $this->hasMany(self::className(), ['id' => 'follow_id'])
-            ->viaTable(UserFollow::tableName(), ['user_id' => 'id'],
-                function ($query) {
-                    /** @var $query ActiveQuery */
-                    return $query->andWhere(['status' => UserFollow::STATUS_ACTIVE]);
-                }
-            );
+            ->viaTable(UserFollow::tableName(), ['user_id' => 'id']);
     }
 
     /**
