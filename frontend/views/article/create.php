@@ -80,5 +80,4 @@ $this->params['breadcrumbs'] = [
             <?php ActiveForm::end(); ?>
         </div>
     </div>
-
 </div><!-- article-ask -->
