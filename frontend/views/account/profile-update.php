@@ -21,8 +21,7 @@ use yii\selectize\Selectize;
                         'role' => 'form'
                     ]
                 ]); ?>
-                <?= $form->field($model, 'first_name') ?>
-                <?= $form->field($model, 'last_name') ?>
+                <?= $form->field($model, 'name') ?>
                 <?= $form->field($model, 'gender')->widget(Selectize::className(), [
                     'items' => [
                         null => 'Select your gender',

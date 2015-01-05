@@ -9,20 +9,20 @@ use yii\helpers\Html;
 
 if ($model->parent) {
     $breadcrumbs = [
-        ['label' => 'Article', 'url' => ['/article/index']],
+        ['label' => 'Articles', 'url' => ['/article/index']],
         ['label' => $model->parent->title, 'url' => $model->parent->url],
         $model->title
     ];
 } else {
     $breadcrumbs = [
-        ['label' => 'Article', 'url' => ['/article/index']],
+        ['label' => 'Articles', 'url' => ['/article/index']],
         $model->title
     ];
 }
 $this->title = $model->title . ' - Article Category';
 $this->params['breadcrumbs'] = $breadcrumbs;
 ?>
-<h1><?= Html::encode($model->title); ?></h1>
+<h1 class="page-header"><?= Html::encode($model->title); ?></h1>
 <div class="row">
     <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
         <?php if (!empty($model->subs)): ?>
@@ -45,7 +45,8 @@ $this->params['breadcrumbs'] = $breadcrumbs;
             <?= ListView::widget([
                 'dataProvider' => $dataProvider,
                 'itemView' => 'items/index',
-                'layout' => "{items}\{pager}"
+                'layout' => "{items}\{pager}",
+                'emptyText' => Yii::t('app','No articles found')
             ]); ?>
         </div>
     </div>

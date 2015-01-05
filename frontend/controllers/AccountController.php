@@ -3,14 +3,13 @@
 namespace frontend\controllers;
 
 use common\behaviors\LayoutsBehavior;
-use common\models\CropModel;
-use common\models\UploadForm;
 use common\models\User;
 use common\models\UserEmail;
 use common\models\UserLogin;
 use common\models\UserOAuth;
 use common\models\UserProfile;
 use frontend\models\AuthSignupForm;
+use frontend\models\ChangeAvatar;
 use frontend\models\ChangePasswordForm;
 use frontend\models\LoginForm;
 use frontend\models\PasswordResetForm;
@@ -19,7 +18,6 @@ use frontend\models\RequestVerifyForm;
 use frontend\models\SignupForm;
 use yii\authclient\ClientInterface;
 use yii\flash\Flash;
-use yii\authclient\BaseClient;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
@@ -164,12 +162,11 @@ class AccountController extends Controller
         if (!User::validateResetToken($token)) {
             Flash::alert(Flash::ALERT_DANGER, 'The reset token invalid');
         } else {
-            $userLogin = UserLogin::findByResetToken($token);
-            if (!$userLogin) {
+            if (is_null($userLogin = UserLogin::findByResetToken($token))) {
                 Flash::alert(Flash::ALERT_DANGER, 'The reset token invalid');
             }
         }
-        if (!isset($userLogin) || !$userLogin) {
+        if (!isset($userLogin) || is_null($userLogin)) {
             $this->redirect(['/account/password-request', 'ref' => 'try']);
             Yii::$app->end();
         }
@@ -200,15 +197,15 @@ class AccountController extends Controller
         if (!User::validateResetToken($token)) {
             Flash::alert(Flash::ALERT_DANGER, 'The reset token invalid');
         } else {
-            $userEmail = UserEmail::findByResetToken($token);
-            if (!$userEmail) {
+
+            if (is_null($userEmail = UserEmail::findByResetToken($token))) {
                 Flash::alert(Flash::ALERT_DANGER, 'The reset token invalid');
             } else {
                 $userEmail->verified();
                 $this->goHome();
             }
         }
-        if (!isset($userEmail) || !$userEmail) {
+        if (!isset($userEmail) || is_null($userEmail)) {
             $this->redirect(['/account/activate-request', 'ref' => 'try']);
             Yii::$app->end();
         }
@@ -227,6 +224,7 @@ class AccountController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             Flash::alert(Flash::ALERT_SUCCESS, 'Your new email address has been added successfully.');
             $this->refresh();
+            Yii::$app->end();
         }
         return $this->renderPartial('email-add', ['model' => $model]);
     }
@@ -251,7 +249,7 @@ class AccountController extends Controller
             'email' => $email,
             'user_id' => Yii::$app->user->id
         ]);
-        if (!$model) {
+        if (is_null($model)) {
             Flash::alert(Flash::ALERT_WARNING, "This email {$email} not found on your account");
         } else {
             $model->verifying();
@@ -265,7 +263,7 @@ class AccountController extends Controller
             'email' => $email,
             'user_id' => Yii::$app->user->id
         ]);
-        if (!$model) {
+        if (is_null($model)) {
             Flash::alert(Flash::ALERT_WARNING, "This email {$email} not found on your account");
         } else {
             $model->primary();
@@ -324,27 +322,8 @@ class AccountController extends Controller
 
     public function profilePicture()
     {
-        return $this->renderPartial('profile-picture');
-    }
-
-    public function actionPictureUpload()
-    {
-        Yii::$app->response->format = Response::FORMAT_JSON;
-
-        $model = new UploadForm();
-        if (Yii::$app->request->isPost && $model->upload()) {
-            return $model->getResponse();
-        }
-    }
-
-    public function actionPictureCrop()
-    {
-        Yii::$app->response->format = Response::FORMAT_JSON;
-        $model = new CropModel();
-        if ($model->load(Yii::$app->request->post()) && $model->crop()) {
-            Yii::$app->user->identity->userProfile->updateAttributes(['picture' => $model->getUrl()]);
-            return $model->getResponse();
-        }
+        $model = new ChangeAvatar();
+        return $this->renderPartial('profile-picture', ['model' => $model]);
     }
 
     public function profileUpdate()
@@ -362,30 +341,6 @@ class AccountController extends Controller
         }
     }
 
-    public function profilePrimary()
-    {
-        $userProfiles = Yii::$app->user->identity->userProfiles;
-        if (!is_null($userProfiles)) {
-            $profiles = ArrayHelper::map($userProfiles, 'id', 'name');
-        }
-        $id = Yii::$app->request->post('id');
-        if ($id !== null) {
-            $profile = UserProfile::findOne([
-                'user_id' => Yii::$app->user->id,
-                'id' => (int)$id
-            ]);
-            if (!$profile) {
-                Flash::alert(Flash::ALERT_WARNING, 'This profile not found on your account.');
-            } else {
-                $profile->primary();
-            }
-            $this->refresh();
-            Yii::$app->end();
-        }
-        return $this->renderPartial('profile-primary', [
-            'profiles' => $profiles
-        ]);
-    }
 
     /**
      * @param UserProfile $profile
@@ -414,8 +369,6 @@ class AccountController extends Controller
     {
         $requiredSignUp = false;
         $userAttributes = $client->userAttributes;
-        //print_r($userAttributes);
-        //die();
         if (Yii::$app->user->isGuest) {
             if (is_null($userOAuth = UserOAuth::findOne(['social_id' => $userAttributes['id']]))) {
                 if (ArrayHelper::keyExists('email', $userAttributes)) {

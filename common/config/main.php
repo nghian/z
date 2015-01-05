@@ -1,6 +1,6 @@
 <?php
 return [
-    'name' => 'Yii App',
+    'name' => 'phpSyntax',
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
     'components' => [
         'cache' => [

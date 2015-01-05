@@ -3,7 +3,7 @@
 use yii\bootstrap\Carousel;
 use yii\helpers\Html;
 
-$this->title = 'My Yii Application';
+$this->title = 'phpSyntax - ';
 ?>
 <div class="site-index">
     <div class="body-content">
@@ -36,7 +36,6 @@ $this->title = 'My Yii Application';
             </div>
             <div class="col-lg-4">
                 <h2>Heading</h2>
-
                 <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore
                     et
                     dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut

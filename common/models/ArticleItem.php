@@ -6,6 +6,7 @@ use common\behaviors\WordCountBehavior;
 use Yii;
 use yii\behaviors\SluggableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 use yii\helpers\Html;
 
 /**
@@ -31,7 +32,7 @@ use yii\helpers\Html;
  * @property ArticleComment $comments
  * @property ArticleCategory $category
  */
-class ArticleItem extends \yii\db\ActiveRecord
+class ArticleItem extends ActiveRecord
 {
     use UserRelationTrait;
     const STATUS_ACTIVE = 1;
@@ -148,5 +149,31 @@ class ArticleItem extends \yii\db\ActiveRecord
         return false;
     }
 
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if (!$insert) {
+                if ($this->isAttributeChanged('tags')) {
+                    (new ArticleTag())->syncTags($this->getOldAttribute('tags'), $this->tags, $this->id);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
 
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        if ($insert) {
+            (new ArticleTag())->addTags(ArticleTag::str2tags($this->tags), $this->id);
+        }
+    }
+
+    public function afterDelete()
+    {
+        parent::afterDelete();
+        ArticleComment::deleteAll(['article_id' => $this->id]);
+        (new ArticleTag())->syncTags($this->tags, '', $this->id);
+    }
 }

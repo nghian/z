@@ -14,7 +14,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="row">
     <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
         <div class="article-category">
-            <h2 class="page-header">Article Category</h2>
+            <h2 class="page-header">Category</h2>
 
             <div class="article-category-body">
                 <ul class="row">

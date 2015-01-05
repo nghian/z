@@ -16,18 +16,17 @@
     font-weight: normal;
     font-variant: normal;
     text-transform: none;
-    line-height: 1.42857;
-    vertical-align: middle;
-    /* Better Font Rendering =========== */
+    line-height: 1;
+    vertical-align: baseline;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
 .psi {
-    &-brand{
-        &:before{
+    &-brand {
+        &:before {
             content: "\e790";
-            @media (min-width: @screen-sm-min){
+            @media (min-width: @screen-sm-min) {
                 content: "\e791";
             }
         }
@@ -3064,3 +3063,167 @@
     }
 
 }
+
+.psi-lg {
+    font-size: 1.33333333em;
+    line-height: 0.75em;
+    vertical-align: -15%;
+}
+
+.psi-2x {
+    font-size: 2em;
+}
+
+.psi-3x {
+    font-size: 3em;
+}
+
+.psi-4x {
+    font-size: 4em;
+}
+
+.psi-5x {
+    font-size: 5em;
+}
+
+.psi-fw {
+    width: 1.28571429em;
+    text-align: center;
+}
+
+.psi-ul {
+    padding-left: 0;
+    margin-left: 2.14285714em;
+    list-style-type: none;
+}
+
+.psi-ul > li {
+    position: relative;
+}
+
+.psi-li {
+    position: absolute;
+    left: -2.14285714em;
+    width: 2.14285714em;
+    top: 0.14285714em;
+    text-align: center;
+}
+
+.psi-li.psi-lg {
+    left: -1.85714286em;
+}
+
+.psi-border {
+    padding: .2em .25em .15em;
+    border: solid 0.08em #eeeeee;
+    border-radius: .1em;
+}
+
+.psi.pull-left {
+    margin-right: .3em;
+}
+
+.psi.pull-right {
+    margin-left: .3em;
+}
+
+.psi-spin {
+    -webkit-animation: spinner 2s infinite linear;
+    animation: spinner 2s infinite linear;
+    display: inline-block;
+}
+
+@-webkit-keyframes spinner {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+    }
+}
+
+@keyframes spinner {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+    }
+}
+
+.psi-rotate-90 {
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=1);
+    -webkit-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(90deg);
+}
+
+.psi-rotate-180 {
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2);
+    -webkit-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+.psi-rotate-270 {
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+    -webkit-transform: rotate(270deg);
+    -ms-transform: rotate(270deg);
+    transform: rotate(270deg);
+}
+
+.psi-flip-horizontal {
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0, mirror=1);
+    -webkit-transform: scale(-1, 1);
+    -ms-transform: scale(-1, 1);
+    transform: scale(-1, 1);
+}
+
+.psi-flip-vertical {
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2, mirror=1);
+    -webkit-transform: scale(1, -1);
+    -ms-transform: scale(1, -1);
+    transform: scale(1, -1);
+}
+
+:root .psi-rotate-90,
+:root .psi-rotate-180,
+:root .psi-rotate-270,
+:root .psi-flip-horizontal,
+:root .psi-flip-vertical {
+    filter: none;
+}
+
+.psi-stack {
+    position: relative;
+    display: inline-block;
+    width: 2em;
+    height: 2em;
+    line-height: 2em;
+    vertical-align: middle;
+}
+
+.psi-stack-1x,
+.psi-stack-2x {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.psi-stack-1x {
+    line-height: inherit;
+}
+
+.psi-stack-2x {
+    font-size: 2em;
+}
+
+.psi-inverse {
+    color: #ffffff;
+}
+

@@ -4,16 +4,16 @@ return [
     'clients' => [
         'google' => [
             'class' => 'yii\authclient\clients\GoogleOAuth',
-            'clientId' => '423624264928.apps.googleusercontent.com',
-            'clientSecret' => 'lyPxSQHvbrrY6iUPcz9DQCwI',
+            'clientId' => '327215521469-rnks8ji7e4jbgo2ijg9dcoslvgv6dtkp.apps.googleusercontent.com',
+            'clientSecret' => 's5HsWi0SEVKtj6fwXzEckGYP',
             'normalizeUserAttributeMap' => [
                 'email' => ['emails', '0', 'value'],
                 'name' => 'displayName',
-                'verified' => function ($response) {
-                    return intval($response['verified']);
+                'verified' => function ($attributes) {
+                    return intval($attributes['verified']);
                 },
-                'picture' => function ($response) {
-                    return str_replace('?sz=50', '', $response['image']['url']);
+                'picture' => function ($attributes) {
+                    return isset($attributes['image']['url']) ? str_replace('sz=50', 'sz=400', $attributes['image']['url']): null;
                 },
                 'locale' => 'language',
                 'location' => 'currentLocation',
@@ -25,13 +25,15 @@ return [
             'clientId' => 'f14d2b85548573f534f6',
             'clientSecret' => '717a65f0d3bd8788c677cddec9ab699cdf1f8c2d',
             'normalizeUserAttributeMap' => [
-                'picture' => 'avatar_url',
-                'website' => 'blog',
-                'created_at' => function ($response) {
-                    return strtotime($response['created_at']);
+                'picture' => function ($attributes) {
+                    return isset($attributes['avatar_url']) ? $attributes['avatar_url'] . '&s=400' : null;
                 },
-                'updated_at' => function ($response) {
-                    return strtotime($response['updated_at']);
+                'website' => 'blog',
+                'created_at' => function ($attributes) {
+                    return strtotime($attributes['created_at']);
+                },
+                'updated_at' => function ($attributes) {
+                    return strtotime($attributes['updated_at']);
                 }
             ]
         ],
@@ -39,20 +41,20 @@ return [
             'class' => 'yii\authclient\clients\Facebook',
             'clientId' => '111068765684175',
             'clientSecret' => 'fa5685f1c9b6b5e13c8efec3eea2f658',
-            'scope' => 'email public_profile user_about_me read_stream publish_actions',
+            'scope' => 'email public_profile user_about_me read_stream publish_actions user_birthday user_website user_hometown read_friendlists',
             'normalizeUserAttributeMap' => [
                 'location' => ['hometown', 'name'],
-                'locale' => function ($response) {
-                    return array_shift(array_values(explode('_', $response['locale'])));
+                'locale' => function ($attributes) {
+                    return isset($attributes['locale']) ? array_shift(array_values(explode('_', $attributes['locale']))) : null;
                 },
-                'birthday' => function ($response) {
-                    return date('Y-m-d', strtotime($response['birthday']));
+                'birthday' => function ($attributes) {
+                    return isset($attributes['birthday']) ? date('Y-m-d', strtotime($attributes['birthday'])) : null;
                 },
-                'website' => function ($response) {
-                    return isset($response['website']) ? 'http://' . $response['website'] : '';
+                'website' => function ($attributes) {
+                    return isset($attributes['website']) ? 'http://' . $attributes['website'] : '';
                 },
-                'picture' => function ($response) {
-                    return 'https://graph.facebook.com/v2.2/' . $response['id'] . '/picture';
+                'picture' => function ($attributes) {
+                    return 'https://graph.facebook.com/v2.2/' . $attributes['id'] . '/picture?width=400&height=400';
                 }
             ]
         ],
@@ -65,8 +67,8 @@ return [
                 'locale' => 'lang',
                 'picture' => 'profile_image_url',
                 'website' => 'url',
-                'created_at' => function ($r) {
-                    return isset($r['created_at']) ? strtotime($r['created_at']) : time();
+                'created_at' => function ($attributes) {
+                    return isset($attributes['created_at']) ? strtotime($attributes['created_at']) : time();
                 }
             ]
         ],
@@ -77,8 +79,8 @@ return [
             'scope' => 'r_basicprofile r_fullprofile r_emailaddress r_contactinfo',
             'normalizeUserAttributeMap' => [
                 'email' => 'email-address',
-                'name' => function ($r) {
-                    return $r['first-name'] . ' ' . $r['last-name'];
+                'name' => function ($attributes) {
+                    return $attributes['first-name'] . ' ' . $attributes['last-name'];
                 },
                 'picture' => 'picture-url',
                 'bio' => 'headline',

@@ -10,12 +10,13 @@ use yii\filters\AccessControl;
 use yii\filters\ContentNegotiator;
 use yii\flash\Flash;
 use yii\helpers\ArrayHelper;
+use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use Yii;
 
 
-class ArticleController extends \yii\web\Controller
+class ArticleController extends Controller
 {
     public function behaviors()
     {
@@ -59,10 +60,7 @@ class ArticleController extends \yii\web\Controller
 
     public function actionCategory($id)
     {
-        $model = ArticleCategory::findOne($id);
-        if (is_null($model)) {
-            throw new NotFoundHttpException("This category was not found");
-        }
+        $model = $this->loadCategory($id);
         $dataProvider = new ActiveDataProvider([
             'query' => ArticleItem::find()
                 ->where([
@@ -130,7 +128,7 @@ class ArticleController extends \yii\web\Controller
             'parent_id' => 0
         ]), 'id', 'title');
         $category = ArrayHelper::merge(['' => 'None'], $category);
-        $model = ArticleItem::findOne($id);
+        $model = $this->loadItem($id);
         $model->synCategory();
         if ($model->subcategory_id) {
             $subcategory = ArrayHelper::map(ArticleCategory::findAll([
@@ -159,10 +157,7 @@ class ArticleController extends \yii\web\Controller
 
     public function actionView($id)
     {
-        $model = ArticleItem::findOne($id);
-        if (is_null($model)) {
-            throw new NotFoundHttpException("This Article was not found");
-        }
+        $model = $this->loadItem($id);
         $commentProvider = new ActiveDataProvider([
             'query' => ArticleComment::find()->where(['article_id' => $model->id, 'status' => ArticleComment::STATUS_ACTIVE]),
             'pagination' => [
@@ -175,6 +170,7 @@ class ArticleController extends \yii\web\Controller
             'commentProvider' => $commentProvider
         ]);
     }
+
 
     public function comment($article_id)
     {
@@ -192,5 +188,51 @@ class ArticleController extends \yii\web\Controller
                 'model' => $model,
             ]);
         }
+    }
+
+    public function actionPrint($id)
+    {
+        return $this->render('print', ['model' => $this->loadItem($id)]);
+    }
+
+    public function actionPublish($id)
+    {
+        return $this->render('publish', ['model' => $this->loadItem($id)]);
+    }
+
+    public function actionLike($id)
+    {
+        return $this->render('like', ['model' => $this->loadItem($id)]);
+    }
+
+    public function actionReport($id)
+    {
+        return $this->render('report', ['model' => $this->loadItem($id)]);
+    }
+
+    /**
+     * @param $id
+     * @return ArticleCategory||null
+     * @throws NotFoundHttpException
+     */
+    public function loadCategory($id)
+    {
+        if (is_null($model = ArticleCategory::findOne($id))) {
+            throw new NotFoundHttpException('This Category was not found');
+        }
+        return $model;
+    }
+
+    /**
+     * @param $id
+     * @return ArticleItem|null
+     * @throws NotFoundHttpException
+     */
+    public function loadItem($id)
+    {
+        if (is_null($model = ArticleItem::findOne($id))) {
+            throw new NotFoundHttpException('This Article was not found');
+        }
+        return $model;
     }
 }

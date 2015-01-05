@@ -3,7 +3,7 @@
 namespace frontend\controllers;
 
 use common\behaviors\LayoutsBehavior;
-use common\models\User;
+use common\models\UserLogin;
 use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
 
@@ -24,56 +24,57 @@ class UserController extends \yii\web\Controller
         ];
     }
 
-    public function actionView($id)
+    public function actionView($username)
     {
-        $model = $this->getUser($id);
+        $model = $this->getUser($username);
         return $this->render('view', ['model' => $model]);
     }
 
-    public function actionArticle($id)
+    public function actionArticle($username)
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => $this->getUser($id)->getArticleItems()
+            'query' => $this->getUser($username)->getArticleItems()
         ]);
         return $this->render('article', ['dataProvider' => $dataProvider]);
     }
 
-    public function actionFriend($id)
+    public function actionFriend($username)
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => $this->getUser($id)->getUserFriends()
+            'query' => $this->getUser($username)->getUserFriends()
         ]);
         return $this->render('friend', ['dataProvider' => $dataProvider]);
     }
 
-    public function actionFollower($id)
+    public function actionFollower($username)
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => $this->getUser($id)->getUserFollowers()
+            'query' => $this->getUser($username)->getUserFollowers()
         ]);
         return $this->render('follower', ['dataProvider' => $dataProvider]);
     }
 
-    public function actionFollowing($id)
+    public function actionFollowing($username)
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => $this->getUser($id)->getUserFollowing()
+            'query' => $this->getUser($username)->getUserFollowing()
         ]);
         return $this->render('following', ['dataProvider' => $dataProvider]);
     }
 
-    public function getInfo($id)
+    public function getInfo($username)
     {
-        $model = $this->getUser($id);
+        $model = $this->getUser($username);
         return $this->renderPartial('userInfo', ['model' => $model]);
     }
 
-    public function getUser($id)
+    public function getUser($username)
     {
         if (!$this->_user) {
-            $this->_user = User::findOne($id);
-            if (!$this->_user) {
+            if (is_null($userLogin = UserLogin::findOne(['username' => $username]))) {
                 throw new NotFoundHttpException('This user was not found');
+            } else {
+                $this->_user = $userLogin->user;
             }
         }
         return $this->_user;

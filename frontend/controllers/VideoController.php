@@ -9,7 +9,6 @@ use common\models\VideoPlaylist;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\web\Response;
 use Yii;
 
 

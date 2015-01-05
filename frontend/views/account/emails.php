@@ -17,19 +17,19 @@ $this->title = 'Emails Settings';
             <ul class="list-group">
                 <?php foreach (Yii::$app->user->identity->userEmails as $email): ?>
                     <li class="list-group-item">
-                        <?= Html::img($email->getGravatar(), ['width' => 18, 'class' => '']); ?>
+                        <span class="psi-email"></span>
                         <span><?= $email->email; ?></span>
                         <?php if ($email->isPrimary): ?>
                             <span class="label label-primary">Primary</span>
                         <?php endif ?>
                         <span class="pull-right">
                         <?php if (!$email->verified): ?>
-                            <?= Html::a($email->verify_token != null ? 'Resend verification link' : 'Verify', ['/account/email-verify', 'email' => $email->email], ['class' => 'btn btn-warning btn-xs']); ?>
+                            <?= Html::a($email->verify_token != null ? '<span class="psi-check"></span> Reverify' : 'Verify', ['/account/email-verify', 'email' => $email->email], ['class' => 'btn btn-warning btn-xs']); ?>
                         <?php endif ?>
                         <?php if (!$email->isPrimary && $email->verified): ?>
                             <?= Html::a('Set Primary', ['/account/email-primary', 'email' => $email->email], ['class' => 'btn btn-primary btn-xs']); ?>
                         <?php endif ?>
-                        <?= Html::a(Html::tag('span', null, ['class' => 'glyphicon glyphicon-trash']), ['/account/email-delete', 'email' => $email->email], ['class' => 'btn btn-xs btn-danger' . (!$email->isPrimary ? '' : ' disabled')]); ?>
+                        <?= Html::a(Html::tag('span', null, ['class' => 'psi-bin']), ['/account/email-delete', 'email' => $email->email], ['class' => 'btn btn-xs btn-danger' . (!$email->isPrimary ? '' : ' disabled')]); ?>
                     </span>
                     </li>
                 <?php endforeach; ?>

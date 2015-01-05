@@ -4,7 +4,6 @@ use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use frontend\assets\AppAsset;
-use frontend\assets\FontAwesomeAsset;
 use yii\flash\Alert;
 
 /* @var $this \yii\web\View */
@@ -40,6 +39,7 @@ AppAsset::register($this);
             'items' => [
                 ['label' => '<span class="psi-file-text"></span> Tutorials', 'url' => ['article/index']],
                 ['label' => '<span class="psi-question-answer"></span> Q & A', 'url' => ['qa/index']],
+                ['label' => '<span class="psi-question-answer"></span> Documentation', 'url' => ['docs/index']]
             ],
         ]);
         $menuItems = [];
@@ -84,7 +84,7 @@ AppAsset::register($this);
 
     <div class="footer">
         <div class="container">
-            <p class="pull-left">&copy; phprestful.com <?= date('Y') ?></p>
+            <p class="pull-left">&copy; phpsyntax.com <?= date('Y') ?></p>
 
             <p class="pull-right"><?= Yii::powered() ?></p>
         </div>

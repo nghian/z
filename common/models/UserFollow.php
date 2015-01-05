@@ -12,7 +12,6 @@ use yii\behaviors\TimestampBehavior;
  * @property integer $follow_id
  * @property integer $created_at
  * @property integer $updated_at
- * @property integer $status
  *
  * Relations
  * @property User $user
@@ -21,8 +20,6 @@ use yii\behaviors\TimestampBehavior;
 class UserFollow extends \yii\db\ActiveRecord
 {
     use UserRelationTrait;
-    const STATUS_ACTIVE = 1;
-    const STATUS_DELETE = 0;
 
     /**
      * @inheritdoc
@@ -49,11 +46,10 @@ class UserFollow extends \yii\db\ActiveRecord
     {
         return [
             [['user_id', 'follow_id'], 'required'],
-            [['user_id', 'follow_id', 'created_at', 'updated_at', 'status'], 'integer'],
+            [['user_id', 'follow_id', 'created_at', 'updated_at'], 'integer'],
             [['user_id', 'follow_id'], 'unique', 'targetAttribute' => ['user_id', 'follow_id'], 'message' => 'You have followed this person'],
             [['user_id','follow_id'], 'exist', 'targetClass' => '\common\models\User', 'targetAttribute' => 'id'],
             ['follow_id', 'compare', 'compareAttribute' => 'user_id', 'operator' => '!=', 'message' => "You can not follow yourself"],
-            ['status', 'default', 'value' => self::STATUS_ACTIVE]
         ];
     }
 
@@ -67,15 +63,8 @@ class UserFollow extends \yii\db\ActiveRecord
             'follow_id' => 'Follow',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
-            'status' => 'Status',
         ];
     }
-
-    public function setActive()
-    {
-        $this->status = self::STATUS_ACTIVE;
-    }
-
 
     public function getFollow()
     {

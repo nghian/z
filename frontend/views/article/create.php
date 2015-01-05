@@ -9,9 +9,30 @@ use yii\helpers\ArrayHelper;
 /* @var $this yii\web\View */
 /* @var $model \common\models\ArticleItem */
 /* @var $form ActiveForm */
+$subc = <<<JS
+    function (value) {
+        $("#articleitem-cid").val(value.target.value);
+        var subc = $("#articleitem-subcategory_id")[0].selectize;
+        subc.disable();
+        subc.clearOptions();
+        subc.load(function (callback) {
+        $.ajax({
+            url: "/article/sub-category?id=" + value.target.value,
+             success: function (res) {
+                subc.enable();
+                callback(res);
+            },
+            error: function ()
+            {
+                callback();
+            }});
+        });
+    }
+JS;
+
 $this->title = "Create new Article";
-$this->params['breadcrumbs']=[
-    ['label'=>'Articles','url'=>['article/index']],
+$this->params['breadcrumbs'] = [
+    ['label' => 'Articles', 'url' => ['article/index']],
     $this->title
 ];
 ?>
@@ -29,7 +50,7 @@ $this->params['breadcrumbs']=[
                     'placeholder' => "Select a Category"
                 ],
                 'clientEvents' => [
-                    "change" => 'function (value) {$("#articleitem-cid").val(value.target.value); var subc = $("#articleitem-subcategory_id")[0].selectize;subc.disable();subc.clearOptions();subc.load(function (callback) { $.ajax({url: "/article/sub-category?id=" + value.target.value, success: function (res) { subc.enable();callback(res);}, error: function () { callback();}});});}'
+                    "change" => new \yii\web\JsExpression($subc)
                 ]
             ]) ?>
             <?= $form->field($model, 'subcategory_id')->widget(Selectize::className(), [
@@ -38,6 +59,7 @@ $this->params['breadcrumbs']=[
                     'placeholder' => "Select a subcategory"
                 ],
                 'clientOptions' => [
+                    'create' => true,
                     "valueField" => "id",
                     "labelField" => "title"
                 ],

@@ -1,5 +1,5 @@
 <?php
-namespace common\helpers;
+namespace common\components;
 
 use yii\base\Component;
 use yii\helpers\Html;
@@ -113,6 +113,9 @@ class Gravatar extends Component
         $this->_emailHash = $hash;
     }
 
+    /**
+     * @return string
+     */
     function __toString()
     {
         return $this->getImageUrl();

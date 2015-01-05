@@ -73,21 +73,21 @@ class Button extends Widget
         if ($this->controller == 'friend') {
             if ($this->model->isFriend) {
                 $this->label = $this->label ? $this->label : 'Unfriend';
-                $this->labelIcon = $this->labelIcon ? $this->labelIcon : 'fa fa-times-circle ';
+                //$this->labelIcon = $this->labelIcon ? $this->labelIcon : 'fa fa-times-circle ';
                 $this->options['data-action'] = 'un';
                 $this->options['data-confirm'] = 'Are you sure you want to unfriend?';
             } elseif ($this->model->isRequestFriend) {
                 $this->label = $this->label ? $this->label : 'Cancel Friend';
-                $this->labelIcon = $this->labelIcon ? $this->labelIcon : 'fa fa-times-circle ';
+                //$this->labelIcon = $this->labelIcon ? $this->labelIcon : 'fa fa-times-circle ';
                 $this->options['data-action'] = 'cancel';
                 $this->options['data-confirm'] = 'Are you sure you want to cancel friend request?';
             } elseif ($this->model->isConfirmFriend) {
                 $this->label = $this->label ? $this->label : 'Confirm Friend';
-                $this->labelIcon = $this->labelIcon ? $this->labelIcon : 'fa fa-check-circle';
+                //$this->labelIcon = $this->labelIcon ? $this->labelIcon : 'fa fa-check-circle';
                 $this->options['data-action'] = 'confirm';
             } else {
                 $this->label = $this->label ? $this->label : 'Add Friend';
-                $this->labelIcon = $this->labelIcon ? $this->labelIcon : 'fa fa-plus-circle';
+                //$this->labelIcon = $this->labelIcon ? $this->labelIcon : 'fa fa-plus-circle';
             }
         }
     }

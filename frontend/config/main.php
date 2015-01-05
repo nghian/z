@@ -15,7 +15,7 @@ return [
         'user' => [
             'identityClass' => 'common\models\User',
             'enableAutoLogin' => true,
-            'loginUrl'=>['/account/login']
+            'loginUrl' => ['/account/login']
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
@@ -30,10 +30,14 @@ return [
             'class' => 'yii\web\UrlManager',
             'enablePrettyUrl' => true,
             'showScriptName' => false,
-            'rules'=>[
-                'account/authorize/<client:\w+>'=>'account/authorize',
-                '<controller:[a-z0-9\-]+>/<id:\d+>-<slug:[a-z0-9\-]+>'=>'<controller>/view',
-                '<controller:[a-z0-9\-]+>/<action:[a-z0-9\-]+>/<id:\d+>-<slug:[a-z0-9\-]+>'=>'<controller>/<action>'
+            'rules' => [
+                'account/authorize/<client:\w+>' => 'account/authorize',
+                'user/<username:[a-z0-9\-\.]+>' => 'user/article',
+                'user/<username:[a-z0-9\-\.]+>/<action:[a-z0-9\-]+>' => 'user/<action>',
+                'avatar/<u:\d+>/picture.jpg' => 'avatar/picture',
+                '<controller:[a-z0-9\-]+>/<id:\d+>-<slug:[a-z0-9\-]+>' => '<controller>/category',
+                '<controller:[a-z0-9\-]+>/<id:\d+>-<slug:[a-z0-9\-]+>.html' => '<controller>/view',
+                '<controller:[a-z0-9\-]+>/<id:\d+>-<slug:[a-z0-9\-]+>/<action:[a-z0-9\-]+>' => '<controller>/<action>'
             ]
         ],
         'errorHandler' => [

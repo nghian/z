@@ -2,12 +2,12 @@
 
 namespace common\models;
 
-use common\helpers\Gravatar;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\web\IdentityInterface;
 use yii\db\ActiveRecord;
 use Yii;
@@ -229,7 +229,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function getUrl()
     {
-        return ['/user/view', 'id' => $this->id, 'slug' => $this->userLogin->username];
+        return ['/user/article', 'username' => $this->userLogin->username];
     }
 
     /**
@@ -243,16 +243,21 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * @return object|string
+     * @param array $options
+     * @return string
      */
     public function getAvatarUrl($options = [])
     {
-        $options['defaultImage'] = !empty($this->userProfile->picture) ? $this->userProfile->picture : 'monsterid';
-        $options['email'] = $this->userEmail->email;
-        return new Gravatar($options);
+        $params = ['avatar/picture', 'u' => $this->id];
+        if (!empty($options)) {
+            $params = array_merge($params, $options);
+        }
+        return Url::to($params);
     }
 
     /**
+     * @param array $options
+     * @param array $avatarOptions
      * @return string
      */
     public function getAvatarImage($options = [], $avatarOptions = [])

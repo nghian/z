@@ -27,10 +27,10 @@ $this->title = $model->userProfile->name;
                     'class' => 'nav nav-tabs',
                 ],
                 'items' => [
-                    ['label' => 'Articles', 'url' => ['/user/article', 'id' => $model->id, 'slug' => $model->userLogin->username]],
-                    ['label' => 'Friends', 'url' => ['/user/friend', 'id' => $model->id, 'slug' => $model->userLogin->username]],
-                    ['label' => 'Follower', 'url' => ['/user/follower', 'id' => $model->id, 'slug' => $model->userLogin->username]],
-                    ['label' => 'Following', 'url' => ['/user/following', 'id' => $model->id, 'slug' => $model->userLogin->username]]
+                    ['label' => 'Articles', 'url' => ['/user/article', 'username' => $model->userLogin->username]],
+                    ['label' => 'Friends', 'url' => ['/user/friend', 'username' => $model->userLogin->username]],
+                    ['label' => 'Follower', 'url' => ['/user/follower', 'username' => $model->userLogin->username]],
+                    ['label' => 'Following', 'url' => ['/user/following', 'username' => $model->userLogin->username]]
                 ]
             ]); ?>
             <div class="tab-content prepend">
