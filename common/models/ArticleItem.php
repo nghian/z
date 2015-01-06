@@ -118,7 +118,7 @@ class ArticleItem extends ActiveRecord
 
     public function getTags()
     {
-        return $this->hasMany(ArticleTag::className(), ['id' => 'tag_id'])->viaTable(Article2tag::tableName(), ['article_id' => 'id']);
+        return $this->hasMany(ArticleTag::className(), ['id' => 'tag_id'])->viaTable(Article2Tag::tableName(), ['article_id' => 'id']);
     }
 
     public function getCategory()
@@ -164,7 +164,7 @@ class ArticleItem extends ActiveRecord
         if (parent::beforeSave($insert)) {
             if (!$insert) {
                 if ($this->isAttributeChanged('list_tags')) {
-                    (new ArticleTag())->synctags($this->getOldAttribute('list_tags'), $this->list_tags, $this->id);
+                    (new ArticleTag())->syncTags($this->getOldAttribute('list_tags'), $this->list_tags, $this->id);
                 }
                 return true;
             }
@@ -176,7 +176,7 @@ class ArticleItem extends ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
         if ($insert) {
-            (new ArticleTag())->addtags(ArticleTag::str2tags($this->list_tags), $this->id);
+            (new ArticleTag())->addTags(ArticleTag::str2tags($this->list_tags), $this->id);
         }
     }
 
@@ -184,6 +184,6 @@ class ArticleItem extends ActiveRecord
     {
         parent::afterDelete();
         ArticleComment::deleteAll(['article_id' => $this->id]);
-        (new ArticleTag())->synctags($this->list_tags, '', $this->id);
+        (new ArticleTag())->syncTags($this->list_tags, '', $this->id);
     }
 }

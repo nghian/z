@@ -165,7 +165,7 @@ class ArticleTag extends \yii\db\ActiveRecord
     public function addTag($name, $articleId)
     {
         if (is_integer($id = self::add($name))) {
-            return (new Article2tag(['article_id' => $articleId, 'tag_id' => $id]))->save();
+            return (new Article2Tag(['article_id' => $articleId, 'tag_id' => $id]))->save();
         }
 
         return false;
@@ -197,7 +197,7 @@ class ArticleTag extends \yii\db\ActiveRecord
     public function removeTag($name, $articleId)
     {
         if (is_integer($id = self::remove($name))) {
-            return Article2tag::deleteAll(['article_id' => $articleId, 'tag_id' => $id]);
+            return Article2Tag::deleteAll(['article_id' => $articleId, 'tag_id' => $id]);
         }
         return false;
     }
