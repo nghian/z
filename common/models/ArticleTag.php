@@ -5,6 +5,8 @@ namespace common\models;
 use Yii;
 use yii\behaviors\SluggableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "article_tag".
@@ -48,6 +50,7 @@ class ArticleTag extends \yii\db\ActiveRecord
         return [
             ['name', 'trim'],
             ['name', 'required'],
+            ['name', 'unique'],
             [['frequency', 'created_at', 'updated_at'], 'integer'],
             [['name', 'slug'], 'string', 'max' => 255]
         ];
@@ -66,6 +69,31 @@ class ArticleTag extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Update At',
         ];
+    }
+
+    public function getArticles()
+    {
+        return $this->hasMany(ArticleItem::className(), ['id' => 'article_id'])
+            ->andWhere(['status' => ArticleItem::STATUS_PUBLISHED]);
+    }
+
+    /**
+     * @return array
+     */
+    public function getUrl()
+    {
+        return ['/article/tagged', 'slug' => $this->slug];
+    }
+
+    /**
+     * @param array $options
+     * @return string
+     */
+    public function getLink($options = [])
+    {
+        $options['title'] = ArrayHelper::getValue($options, 'title', $this->name);
+        Html::addCssClass($options, 'tag');
+        return Html::a($this->name, $this->getUrl(), $options);
     }
 
     /**

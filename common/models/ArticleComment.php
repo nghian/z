@@ -23,8 +23,8 @@ use yii\behaviors\TimestampBehavior;
 class ArticleComment extends \yii\db\ActiveRecord
 {
     use UserRelationTrait;
-    const STATUS_ACTIVE = 1;
-    const STATUS_WAIT = 0;
+    const STATUS_APPROVED = 1;
+    const STATUS_PENDING = 0;
 
     /**
      * @inheritdoc
@@ -55,7 +55,7 @@ class ArticleComment extends \yii\db\ActiveRecord
             ['user_id', 'exist', 'targetClass' => '\common\models\User', 'targetAttribute' => 'id'],
             ['body', 'trim'],
             ['body', 'string'],
-            ['status', 'default', 'value' => self::STATUS_ACTIVE],
+            ['status', 'default', 'value' => self::STATUS_APPROVED],
         ];
     }
 

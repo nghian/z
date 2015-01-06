@@ -72,7 +72,7 @@ $this->params['breadcrumbs'] = [
             <?= $form->field($model, 'summary')->textarea(['rows' => 4]) ?>
             <?= $form->field($model, 'body')->widget(Redactor::className()) ?>
             <?= $form->field($model, 'bio')->textarea(['rows' => 4]) ?>
-            <?= $form->field($model, 'tags')->widget(Selectize::className(), ['clientOptions' => ['plugins' => ['remove_button', 'drag_drop'],
+            <?= $form->field($model, 'list_tags')->widget(Selectize::className(), ['clientOptions' => ['plugins' => ['remove_button', 'drag_drop'],
                 'maxItems' => 5]]) ?>
             <div class="form-group">
                 <?= Html::submitButton(Yii::t('app', 'Create'), ['class' => 'btn btn-primary']) ?>

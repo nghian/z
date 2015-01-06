@@ -70,9 +70,13 @@ $this->params['breadcrumbs'] = $breadcrumbs;
                     </div>
                 </div>
             </div>
-            <div class="article-tags">
-                <?=$model->tags;?>
-            </div>
+            <?php if ($model->getTags()->count()): ?>
+                <div class="article-tags">
+                    <?php foreach ($model->tags as $tag): ?>
+                        <?= $tag->link; ?>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
         <div class="article-comment">
             <h2>Comments</h2>

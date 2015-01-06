@@ -5,7 +5,9 @@ namespace frontend\controllers;
 use common\models\ArticleCategory;
 use common\models\ArticleComment;
 use common\models\ArticleItem;
+use common\models\ArticleTag;
 use yii\data\ActiveDataProvider;
+use yii\db\Expression;
 use yii\filters\AccessControl;
 use yii\filters\ContentNegotiator;
 use yii\flash\Flash;
@@ -46,7 +48,11 @@ class ArticleController extends Controller
         $category = ArticleCategory::findAll(['parent_id' => 0, 'status' => ArticleCategory::STATUS_ACTIVE]);
         $dataProvider = new ActiveDataProvider([
             'query' => ArticleItem::find()
-                ->where(['status' => ArticleItem::STATUS_ACTIVE])
+                ->where([
+                    'AND',
+                    ['status' => ArticleItem::STATUS_PUBLISHED],
+                    ['<=', 'published_at', new Expression('UNIX_TIMESTAMP()')]
+                ])
                 ->orderBy(['created_at' => SORT_DESC, 'updated_at' => SORT_DESC]),
             'pagination' => [
                 'pageSize' => 20
@@ -63,10 +69,8 @@ class ArticleController extends Controller
         $model = $this->loadCategory($id);
         $dataProvider = new ActiveDataProvider([
             'query' => ArticleItem::find()
-                ->where([
-                    'cid' => $model->id,
-                    'status' => ArticleItem::STATUS_ACTIVE
-                ])
+                ->where(['cid' => $model->id, 'status' => ArticleItem::STATUS_PUBLISHED])
+                ->andWhere(['<=', 'published_at', new Expression('UNIX_TIMESTAMP()')])
                 ->orderBy(['created_at' => SORT_DESC, 'updated_at' => SORT_DESC]),
             'pagination' => [
                 'pageSize' => 20
@@ -78,12 +82,21 @@ class ArticleController extends Controller
         ]);
     }
 
+    public function actionTagged($slug)
+    {
+        $model = $this->loadTag($slug);
+        $dataProvider = new ActiveDataProvider([
+            'query' => $model->getArticles()
+        ]);
+        return $this->render('tagged', ['model' => $model, 'dataProvider' => $dataProvider]);
+    }
+
     public function actionSubCategory($id)
     {
-        $model = ArticleCategory::findAll(['parent_id' => $id]);
         $response = [['id' => 0, 'title' => 'None (Not select subcategory)']];
-        foreach ($model as $cat) {
-            $response[] = ['id' => $cat->id, 'title' => $cat->title];
+        if (ArticleCategory::find()->select(['id', 'title'])->where(['parent_id' => $id])->count() > 0) {
+            $subs = ArticleCategory::find()->select(['id', 'title'])->where(['parent_id' => $id])->asArray()->all();
+            $response = array_merge($response, $subs);
         }
         return $response;
     }
@@ -159,7 +172,7 @@ class ArticleController extends Controller
     {
         $model = $this->loadItem($id);
         $commentProvider = new ActiveDataProvider([
-            'query' => ArticleComment::find()->where(['article_id' => $model->id, 'status' => ArticleComment::STATUS_ACTIVE]),
+            'query' => ArticleComment::find()->where(['article_id' => $model->id, 'status' => ArticleComment::STATUS_APPROVED]),
             'pagination' => [
                 'pageSize' => 2
             ]
@@ -208,6 +221,19 @@ class ArticleController extends Controller
     public function actionReport($id)
     {
         return $this->render('report', ['model' => $this->loadItem($id)]);
+    }
+
+    /**
+     * @param $id
+     * @return ArticleCategory||null
+     * @throws NotFoundHttpException
+     */
+    public function loadTag($slug)
+    {
+        if (is_null($model = ArticleTag::findOne(['slug' => $slug]))) {
+            throw new NotFoundHttpException('This Tag was not found');
+        }
+        return $model;
     }
 
     /**

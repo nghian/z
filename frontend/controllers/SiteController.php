@@ -1,7 +1,6 @@
 <?php
 namespace frontend\controllers;
 
-use common\components\UploadAction;
 use frontend\models\ContactForm;
 use yii\flash\Flash;
 use yii\validators\FileValidator;
@@ -22,10 +21,7 @@ class SiteController extends Controller
             'captcha' => [
                 'class' => 'yii\captcha\CaptchaAction',
                 'fixedVerifyCode' => YII_ENV_TEST ? 'testme' : null,
-            ],
-            'upload'=>[
-                'class'=>UploadAction::className(),
-            ],
+            ]
         ];
     }
 

@@ -5,6 +5,7 @@ namespace common\models;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -221,7 +222,9 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function getArticleItems()
     {
-        return $this->hasMany(ArticleItem::className(), ['user_id' => 'id'])->andWhere(['status' => ArticleItem::STATUS_ACTIVE]);
+        return $this->hasMany(ArticleItem::className(), ['user_id' => 'id'])
+            ->andWhere(['status' => ArticleItem::STATUS_PUBLISHED])
+            ->andWhere(['<=','published_at',new Expression('UNIX_TIMESTAMP()')]);
     }
 
     /**
