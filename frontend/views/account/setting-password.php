@@ -18,7 +18,7 @@ use yii\widgets\ActiveForm;
                 <div class="col-lg-8 col-md-8">
                     <?= $form->field($model, 'password')->passwordInput() ?>
                     <?= $form->field($model, 'newPassword')->passwordInput() ?>
-                    <?= $form->field($model, 'confirm')->passwordInput() ?>
+                    <?= $form->field($model, 'password_repeat')->passwordInput() ?>
                 </div>
             </div>
         </div>

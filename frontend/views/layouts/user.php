@@ -16,8 +16,8 @@ $this->title = $model->userProfile->name;
         <?= $model->getAvatarImage(['width' => 40]); ?>&nbsp;<?= Html::a($model->userLogin->username, $model->url); ?>
         (<?= $model->name; ?>)
         <div class="pull-right">
-            <?= Button::widget(['controller' => 'follow', 'model' => $model, 'size' => 'sm']); ?>
-            <?= Button::widget(['controller' => 'friend', 'model' => $model, 'size' => 'sm']); ?>
+            <?= $model->getFollowButton(['class' => 'btn btn-sm btn-default']); ?>
+            <?= $model->getFriendButton(['class' => 'btn btn-sm btn-default']); ?>
         </div>
     </h1>
     <div class="row">

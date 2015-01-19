@@ -8,7 +8,10 @@ use yii\behaviors\SluggableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\Json;
+use yii\helpers\Url;
 
 /**
  * This is the model class for table "article_item".
@@ -21,7 +24,7 @@ use yii\helpers\Html;
  * @property string $summary
  * @property string $body
  * @property string $bio
- * @property string $list_tags
+ * @property string $str_tags
  * @property integer $word_count
  * @property integer $view_count
  * @property integer $created_at
@@ -34,13 +37,18 @@ use yii\helpers\Html;
  * @property ArticleComment[] $comments
  * @property ArticleTag[] $tags
  * @property ArticleCategory $category
+ *
+ *
+ * Shortcut
+ * @property string $likeButton
+ *
  */
 class ArticleItem extends ActiveRecord
 {
     use UserRelationTrait;
     const STATUS_DRAFT = 0;
     const STATUS_PUBLISHED = 1;
-    const STATUS_ARCHIVED = 10;
+    const STATUS_ARCHIVED = 2;
 
     public $category_id;
     public $subcategory_id;
@@ -76,9 +84,9 @@ class ArticleItem extends ActiveRecord
     {
         return [
             [['user_id', 'category_id', 'cid', 'title', 'summary', 'body'], 'required'],
-            [['user_id', 'cid', 'word_count', 'view_count', 'created_at', 'updated_at', 'published_at', 'status'], 'integer'],
+            [['user_id', 'cid', 'category_id', 'subcategory_id', 'word_count', 'view_count', 'created_at', 'updated_at', 'published_at', 'status'], 'integer'],
             [['summary', 'body', 'bio'], 'string'],
-            [['title', 'slug', 'list_tags'], 'string', 'max' => 255],
+            [['title', 'slug', 'str_tags'], 'string', 'max' => 255],
             [['title'], 'unique'],
             ['user_id', 'exist', 'targetClass' => '\common\models\User', 'targetAttribute' => 'id'],
             ['published_at', 'default', 'value' => new Expression('UNIX_TIMESTAMP()')],
@@ -94,15 +102,15 @@ class ArticleItem extends ActiveRecord
         return [
             'id' => Yii::t('app', 'ID'),
             'user_id' => Yii::t('app', 'User'),
-            'category_id' => Yii::t('app', 'Select Category'),
-            'subcategory_id' => Yii::t('app', 'Select Subcategory'),
+            'category_id' => Yii::t('app', 'Select an category'),
+            'subcategory_id' => Yii::t('app', 'Select an subcategory'),
             'cid' => Yii::t('app', 'Category'),
             'title' => Yii::t('app', 'Title'),
             'slug' => Yii::t('app', 'slug'),
             'summary' => Yii::t('app', 'Summary'),
             'body' => Yii::t('app', 'Body'),
             'bio' => Yii::t('app', 'Bio'),
-            'list_tags' => Yii::t('app', 'Tags'),
+            'str_tags' => Yii::t('app', 'Tags'),
             'word_count' => Yii::t('app', 'Word Count'),
             'view_count' => Yii::t('app', 'View Count'),
             'created_at' => Yii::t('app', 'Created At'),
@@ -111,22 +119,39 @@ class ArticleItem extends ActiveRecord
         ];
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLikes()
+    {
+        return $this->hasMany(ArticleLike::className(), ['article_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getComments()
     {
         return $this->hasMany(ArticleComment::className(), ['article_id' => 'id'])->andWhere(['status' => ArticleComment::STATUS_APPROVED]);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getTags()
     {
         return $this->hasMany(ArticleTag::className(), ['id' => 'tag_id'])->viaTable(Article2Tag::tableName(), ['article_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getCategory()
     {
         return $this->hasOne(ArticleCategory::className(), ['id' => 'cid']);
     }
 
-    public function synCategory()
+    public function syncCategory()
     {
         if (!$this->isNewRecord) {
             if (is_null($this->category->parent)) {
@@ -138,16 +163,49 @@ class ArticleItem extends ActiveRecord
         }
     }
 
+    public function getLikeButton($options = [])
+    {
+        $options = array_merge($options, [
+            'class' => 'btn btn-xs btn-default',
+        ]);
+        if (Yii::$app->user->isGuest) {
+            Html::a(Html::tag('span', null, ['class' => 'psi-thumb-up']) . ' Like', [Yii::$app->user->loginUrl, 'ref' => Yii::$app->request->absoluteUrl], $options);
+        } else {
+            $options = array_merge($options, [
+                'data-toggle' => 'ajax',
+                'data-type' => 'POST',
+                'data-data' => Json::encode(['id' => $this->id]),
+                'data-data-type' => 'json',
+                'data-url' => Url::to(['article/like']),
+                'data-cache' => 'false',
+            ]);
+            if (ArticleLike::hasLike($this->id)) {
+                return Html::button(Html::tag('span', null, ['class' => 'psi-thumb-down']) . ' Unlike', array_merge($options, ['data-alert' => 'Are you sure to unlike this article?']));
+            } else {
+                return Html::button(Html::tag('span', null, ['class' => 'psi-thumb-up']) . ' Like', $options);
+            }
+        }
+    }
+
+    /**
+     * @return array
+     */
     public function getUrl()
     {
         return ['article/view', 'id' => $this->id, 'slug' => $this->slug];
     }
 
+    /**
+     * @return string
+     */
     public function getLink()
     {
         return Html::a($this->title, $this->getUrl(), ['title' => $this->title]);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function beforeValidate()
     {
         if (parent::beforeValidate()) {
@@ -159,31 +217,28 @@ class ArticleItem extends ActiveRecord
         return false;
     }
 
-    public function beforeSave($insert)
-    {
-        if (parent::beforeSave($insert)) {
-            if (!$insert) {
-                if ($this->isAttributeChanged('list_tags')) {
-                    (new ArticleTag())->syncTags($this->getOldAttribute('list_tags'), $this->list_tags, $this->id);
-                }
-                return true;
-            }
-        }
-        return false;
-    }
-
+    /**
+     * @inheritdoc
+     */
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
         if ($insert) {
-            (new ArticleTag())->addTags(ArticleTag::str2tags($this->list_tags), $this->id);
+            (new ArticleTag())->addTags(ArticleTag::str2tags($this->str_tags), $this->id);
+        } else {
+            if (ArrayHelper::keyExists('str_tags', $changedAttributes)) {
+                (new ArticleTag())->syncTags($changedAttributes['str_tags'], $this->str_tags, $this->id);
+            }
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     public function afterDelete()
     {
         parent::afterDelete();
         ArticleComment::deleteAll(['article_id' => $this->id]);
-        (new ArticleTag())->syncTags($this->list_tags, '', $this->id);
+        (new ArticleTag())->syncTags($this->str_tags, '', $this->id);
     }
 }

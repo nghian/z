@@ -238,7 +238,7 @@ class AccountController extends Controller
         if ($model && $model->delete()) {
             Flash::alert(Flash::ALERT_SUCCESS, "Your email {$email} was deleted");
         } else {
-            Flash::alert(Flash::ALERT_SUCCESS, "Unable to delete this email {$email}");
+            Flash::alert(Flash::ALERT_SUCCESS, "Unable permission to delete this email {$email}");
         }
         $this->redirect(['emails']);
     }

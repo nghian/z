@@ -8,6 +8,7 @@ use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\helpers\Url;
 use yii\web\IdentityInterface;
 use yii\db\ActiveRecord;
@@ -57,6 +58,7 @@ class User extends ActiveRecord implements IdentityInterface
     const ROLE_ADMIN = 4;
     const ROLE_BANNED = 5;
 
+
     /**
      * @inheritdoc
      */
@@ -105,6 +107,25 @@ class User extends ActiveRecord implements IdentityInterface
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    /**
+     * @param int $role
+     * @return bool|mixed
+     */
+    public static function getRoleName($role)
+    {
+        $roles = [
+            self::ROLE_ADMIN => 'admin',
+            self::ROLE_MANAGER => 'manager',
+            self::ROLE_EDITOR => 'editor',
+            self::ROLE_REGISTER => 'register',
+            self::ROLE_BANNED => 'banned'
+        ];
+        if (ArrayHelper::keyExists($role, $roles)) {
+            return ArrayHelper::getValue($roles, $role);
+        }
+        return false;
     }
 
     public function getUserEmail()
@@ -224,7 +245,79 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return $this->hasMany(ArticleItem::className(), ['user_id' => 'id'])
             ->andWhere(['status' => ArticleItem::STATUS_PUBLISHED])
-            ->andWhere(['<=','published_at',new Expression('UNIX_TIMESTAMP()')]);
+            ->andWhere(['<=', 'published_at', new Expression('UNIX_TIMESTAMP()')]);
+    }
+
+    /**
+     * @param array $options
+     * @return string
+     */
+    public function getFollowButton($options = [])
+    {
+        $options = array_merge($options, ['class' => 'btn btn-sm btn-default']);
+        if (Yii::$app->user->isGuest) {
+            return Html::a(Html::tag('span', null, ['class' => '']) . ' Follow', [Yii::$app->user->loginUrl, 'ref' => Yii::$app->request->absoluteUrl], $options);
+        } else {
+            $options = array_merge($options, [
+                'data-toggle' => 'ajax',
+                'data-type' => 'POST',
+                'data-data-type' => 'json',
+                'data-data' => Json::encode(['id' => $this->id]),
+                'data-cache' => 'false',
+            ]);
+            if ($this->isFollowed) {
+                return Html::button(Html::tag('span', null, ['class' => 'psi-eye-minus']) . ' Unfollow', array_merge($options, [
+                    'data-alert' => 'Are you sure unfollow this person',
+                    'data-url' => Url::to(['follow/un'])
+                ]));
+            } else {
+                return Html::button(Html::tag('span', null, ['class' => 'psi-eye-plus']) . ' Follow', array_merge($options, [
+                    'data-url' => Url::to(['follow/add'])
+                ]));
+            }
+        }
+    }
+
+    /**
+     * @param array $options
+     * @return string
+     */
+    public function getFriendButton($options = ['class' => 'btn btn-sm btn-default'])
+    {
+        $options = array_merge($options, ['class' => 'btn btn-sm btn-default']);
+
+        if (Yii::$app->user->isGuest) {
+            return Html::a(Html::tag('span', null, ['class' => 'psi-add']) . ' Add friend', [Yii::$app->user->loginUrl, 'ref' => Yii::$app->request->absoluteUrl], $options);
+        } else {
+            $options = array_merge($options, [
+                'data-toggle' => 'ajax',
+                'data-type' => 'POST',
+                'data-cache' => 'false',
+                'data-data-type' => 'json',
+                'data-data' => Json::encode(['id' => $this->id]),
+            ]);
+            if ($this->isFriend) {
+                return Html::button(Html::tag('span', null, ['class' => 'psi-cancel-c']) . ' Unfriend', array_merge($options, [
+                    'data-alert' => 'Are you sure unfriend this person',
+                    'data-url' => Url::to(['friend/un'])
+                ]));
+            } elseif ($this->isRequestFriend) {
+                $options = array_merge($options, [
+                    'data-url' => Url::to(['friend/cancel'])
+                ]);
+                return Html::button(Html::tag('span', null, ['class' => 'psi-cancel-o']) . ' Cancel friend', array_merge($options, [
+                    'data-url' => Url::to(['friend/cancel'])
+                ]));
+            } elseif ($this->isConfirmFriend) {
+                return Html::button(Html::tag('span', null, ['class' => 'psi-check']) . ' Confirm friend', array_merge($options, [
+                    'data-url' => Url::to(['friend/confirm'])
+                ]));
+            } else {
+                return Html::button(Html::tag('span', null, ['class' => 'psi-add']) . ' Add friend', array_merge($options, [
+                    'data-url' => Url::to(['friend/add'])
+                ]));
+            }
+        }
     }
 
     /**
@@ -236,13 +329,13 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param array $options
      * @return string
      */
-    public function getLink()
+    public function getLink($options = [])
     {
-        return Html::a($this->getName(), $this->getUrl(), [
-            'title' => $this->getName()
-        ]);
+        $options['title'] = ArrayHelper::getValue($options, 'title', $this->getName());
+        return Html::a($this->getName(), $this->getUrl(), $options);
     }
 
     /**
@@ -367,8 +460,29 @@ class User extends ActiveRecord implements IdentityInterface
         if (!$this->isNewRecord) {
             $this->setAuthKey();
             $this->save();
+            $authManager = Yii::$app->authManager;
+            $role = $authManager->getRole(self::getRoleName($this->role));
+            if (is_null($authManager->getAssignment($role->name, $this->id))) {
+                $authManager->assign($role, $this->id);
+            }
             return Yii::$app->user->login($this, $remember ? 3600 * 24 * 30 : 0);
         }
         return false;
+    }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        $authManager = Yii::$app->authManager;
+        $role = $authManager->getRole(self::getRoleName($this->role));
+        if (!$insert) {
+            if (ArrayHelper::keyExists('role', $changedAttributes)) {
+                $oldRole = $authManager->getRole(self::getRoleName($changedAttributes['role']));
+                $authManager->revoke($oldRole, $this->id);
+            }
+        }
+        if (is_null($authManager->getAssignment($role->name, $this->id))) {
+            $authManager->assign($role, $this->id);
+        }
     }
 }

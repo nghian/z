@@ -14,22 +14,23 @@ class SignUpForm extends Model
     public $email;
     public $username;
     public $password;
-    public $confirm;
+    public $password_repeat;
     public $verifyCode;
     public $accept;
 
     public function rules()
     {
         return [
-            [['name', 'email', 'username', 'password', 'confirm'], 'trim'],
+            [['name', 'email', 'username', 'password', 'password_repeat'], 'trim'],
             [['name', 'email', 'username', 'password'], 'required'],
             ['email', 'email'],
             ['email', 'unique', 'targetClass' => '\common\models\UserEmail', 'targetAttribute' => 'email'],
             ['username', 'filter', 'filter' => 'strtolower'],
-            ['username', 'string', 'min' => 2, 'max' => 32],
+            ['username', 'string', 'length' => [4, 32]],
+            ['username', 'match', 'pattern' => '/^[a-z0-9\.]+$/', 'message' => '{attribute} allows only letters (a-z), numbers, periods.'],
             ['username', 'unique', 'targetClass' => '\common\models\UserLogin', 'targetAttribute' => 'username'],
             ['password', 'string', 'min' => 6],
-            ['confirm', 'compare', 'compareAttribute' => 'password'],
+            ['password_repeat', 'compare', 'compareAttribute' => 'password'],
             ['verifyCode', 'captcha'],
             ['accept', 'required', 'requiredValue' => 1, 'message' => 'You need accept terms of our service'],
         ];
@@ -39,7 +40,7 @@ class SignUpForm extends Model
     {
         return [
             'name' => 'Full name',
-            'confirm' => 'Confirm password',
+            'password_repeat' => 'Confirm password',
             'accept' => 'I accept the terms of service'
         ];
     }

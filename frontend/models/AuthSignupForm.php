@@ -21,32 +21,32 @@ class AuthSignupForm extends Model
     public $email;
     public $username;
     public $password;
-    public $confirm;
+    public $password_repeat;
     private $_authorize;
 
     public function rules()
     {
         $rules = [
-            [['email', 'username', 'password', 'confirm'], 'trim'],
+            [['email', 'username', 'password', 'password_repeat'], 'trim'],
+            ['email', 'unique', 'targetClass' => '\common\models\UserEmail', 'targetAttribute' => 'email'],
+            ['email', 'email'],
             [['username', 'password'], 'required'],
             ['username', 'filter', 'filter' => 'strtolower'],
-            ['username', 'string', 'min' => 2, 'max' => 32],
-            ['password', 'string', 'min' => 6, 'max' => 32],
+            ['username', 'string', 'length' => [4, 32]],
+            ['username', 'match', 'pattern' => '/^[a-z0-9\.]+$/', 'message' => '{attribute} allows only letters (a-z), numbers, periods.'],
             ['username', 'unique', 'targetClass' => '\common\models\UserLogin', 'targetAttribute' => 'username'],
-            ['confirm', 'compare', 'compareAttribute' => 'password']
+            ['password', 'string', 'min' => 6, 'max' => 32],
+            ['password_repeat', 'compare', 'compareAttribute' => 'password']
         ];
         if ($this->isEmailRequired()) {
-            $rules[] = ['email', 'trim'];
             $rules[] = ['email', 'required'];
-            $rules[] = ['email', 'email'];
-            $rules[] = ['email', 'unique', 'targetClass' => '\common\models\UserEmail', 'targetAttribute' => 'email'];
         }
         return $rules;
     }
 
     public function attributeLabels()
     {
-        return ['confirm' => 'Confirm Password'];
+        return ['password_repeat' => 'Confirm Password'];
     }
 
     public function signup()
@@ -66,7 +66,7 @@ class AuthSignupForm extends Model
                 unset($attributes['email']);
                 $userProfile->attributes = $attributes;
                 //print_r($userProfile->attributes);
-               // die();
+                // die();
                 $userProfile->save();
                 (new UserOAuth([
                     'user_id' => $user->id,

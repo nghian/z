@@ -12,8 +12,7 @@ $this->title = 'Join phpSyntax';
 
 ?>
 <div class="account-signup">
-    <h1>Join phpsyntax</h1>
-
+    <h1>Join phpSyntax</h1>
     <div class="row">
         <div class="col-lg-5 col-md-6 col-sm-8">
             <div class="well">
@@ -23,9 +22,9 @@ $this->title = 'Join phpSyntax';
                 <?= $form->field($model, 'username') ?>
                 <?= $form->field($model, 'email') ?>
                 <?= $form->field($model, 'password')->passwordInput() ?>
-                <?= $form->field($model, 'confirm')->passwordInput() ?>
+                <?= $form->field($model, 'password_repeat')->passwordInput() ?>
                 <?= $form->field($model, 'verifyCode')->widget(Captcha::className(), [
-                    'template' => '<div class="row"><div class="col-lg-3 col-md-3">{image}</div><div class="col-lg-9 col-md-9">{input}</div></div>',
+                    'template' => '<div class="row"><div class="col-sm-3">{image}</div><div class="col-md-9">{input}</div></div>',
                 ]) ?>
                 <?= $form->field($model, 'accept')->checkbox() ?>
                 <div class="form-group">

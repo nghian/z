@@ -3,13 +3,16 @@
 namespace frontend\controllers;
 
 use common\models\UserFollow;
+use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\web\Response;
 use Yii;
 
 class FollowController extends \yii\web\Controller
 {
-    public $defaultAction = 'add';
-
+    /**
+     * @inheritdoc
+     */
     public function behaviors()
     {
         return [
@@ -36,19 +39,21 @@ class FollowController extends \yii\web\Controller
     {
         $model = new UserFollow([
             'user_id' => Yii::$app->user->id,
-            'follow_id' => Yii::$app->request->post('userId')
+            'follow_id' => Yii::$app->request->post('id')
         ]);
         if ($model->save()) {
             return [
                 'status' => true,
-                'options' => [
-                    'action' => 'un',
-                    'label' => 'Unfollow',
-                    'confirm' => 'Are you sure you want to unfollow?'
+                'replace' => [
+                    'data' => [
+                        'url' => Url::to(['follow/un']),
+                        'alert' => 'Are you sure to unfollow this person?',
+                    ],
+                    'html' => Html::tag('span', null, ['class' => 'psi-eye-minus']) . ' Unfollow'
                 ]
             ];
         } else {
-            return ['status' => false, 'message' => array_shift(array_values($model->firstErrors))];
+            return ['status' => false, 'alert' => ['message' => array_shift(array_values($model->firstErrors)), 'type' => 'warning']];
         }
     }
 
@@ -56,17 +61,26 @@ class FollowController extends \yii\web\Controller
     {
         $model = UserFollow::findOne([
             'user_id' => Yii::$app->user->id,
-            'follow_id' => Yii::$app->request->post('userId')
+            'follow_id' => Yii::$app->request->post('id')
         ]);
         if (is_null($model)) {
-            return ['status' => false, 'message' => 'This follow not exist'];
+            return [
+                'status' => false,
+                'alert' => [
+                    'message' =>
+                        'This follow not exist',
+                    'type' => 'danger'
+                ]
+            ];
         }
         if ($model->delete()) {
             return [
                 'status' => true,
-                'options' => [
-                    'action' => 'add',
-                    'label' => 'Follow',
+                'replace' => [
+                    'data' => [
+                        'url' => Url::to(['follow/add']),
+                    ],
+                    'html' => Html::tag('span', null, ['class' => 'psi-eye-plus']) . ' Follow'
                 ]
             ];
         }

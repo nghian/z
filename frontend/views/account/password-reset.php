@@ -15,7 +15,7 @@ $this->title = 'Create a new login password';
         <div class="col-lg-5 col-md-5">
             <?php $form = ActiveForm::begin(); ?>
             <?= $form->field($model, 'password')->passwordInput() ?>
-            <?= $form->field($model, 'confirm')->passwordInput() ?>
+            <?= $form->field($model, 'password_repeat')->passwordInput() ?>
             <div class="form-group">
                 <?= Html::submitButton(Yii::t('app', 'Create'), ['class' => 'btn btn-primary']) ?>
             </div>

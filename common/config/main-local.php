@@ -20,9 +20,14 @@ return [
                 'encryption' => 'tls'
             ],
         ],
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+            'defaultRoles' => ['admin', 'manager', 'editor', 'register', 'banned']
+        ],
         'assetManager' => [
             'bundles' => [
                 'yii\bootstrap\BootstrapAsset' => [
+                    'sourcePath' => '@webroot',
                     'basePath' => '@webroot',
                     'baseUrl' => '@web',
                     'css' => [

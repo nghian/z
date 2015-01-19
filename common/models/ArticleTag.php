@@ -5,6 +5,7 @@ namespace common\models;
 use Yii;
 use yii\behaviors\SluggableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 
@@ -18,7 +19,7 @@ use yii\helpers\Html;
  * @property integer $created_at
  * @property integer $updated_at
  */
-class ArticleTag extends \yii\db\ActiveRecord
+class ArticleTag extends ActiveRecord
 {
     /**
      * @inheritdoc
@@ -71,10 +72,14 @@ class ArticleTag extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getArticles()
     {
         return $this->hasMany(ArticleItem::className(), ['id' => 'article_id'])
-            ->andWhere(['status' => ArticleItem::STATUS_PUBLISHED]);
+            ->viaTable(Article2Tag::tableName(), ['tag_id' => 'id'])->andWhere(['status' => ArticleItem::STATUS_PUBLISHED]);
+
     }
 
     /**

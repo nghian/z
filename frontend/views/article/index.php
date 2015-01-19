@@ -33,9 +33,9 @@ $this->params['breadcrumbs'][] = $this->title;
             ]); ?>
         </div>
     </div>
-    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-        <div class="well text-center">
-            <a class="btn btn-default btn-primary" href="#">Create new an Article</a>
+    <div class="sidebar col-sm-4">
+        <div class="widget">
+            <a class="btn btn-default btn-default btn-block" href="/article/create">Create new an Article</a>
         </div>
         <div class="tags-cloud">
             <a class="tag" href="#">tag1</a>

@@ -8,7 +8,7 @@ use common\widgets\Button;
 ?>
 <div class="media">
     <div class="pull-left" style="margin:10px">
-        <?= $model->getAvatarImage(['width' => 60], ['size' => 60]); ?>
+        <?= $model->getAvatarImage(['width' => 60], ['s' => 60]); ?>
     </div>
     <div class="media-body">
         <h4 class="media-heading"><?= $model->link; ?></h4>

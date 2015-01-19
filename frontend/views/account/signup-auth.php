@@ -22,7 +22,7 @@ $this->title = 'Authorize Sign Up';
                     <?php endif; ?>
                     <?= $form->field($model, 'username') ?>
                     <?= $form->field($model, 'password')->passwordInput() ?>
-                    <?= $form->field($model, 'confirm')->passwordInput() ?>
+                    <?= $form->field($model, 'password_repeat')->passwordInput() ?>
                 </div>
                 <div class="panel-footer"><?= Html::submitButton(Yii::t('app', 'Sign Up & Sign In'), ['class' => 'btn btn-default']) ?></div>
             </div>

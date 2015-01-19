@@ -1,0 +1,99 @@
+.tags {
+    position: relative;
+    ul& {
+        list-style: none;
+    }
+    > li > a.tag, a.tag {
+        float: left;
+        height: @tag-height-base;
+        line-height: @tag-height-base;
+        position: relative;
+    }
+    & a.tag {
+        &:not(:first-child){
+            margin-left: @line-height-computed;
+        }
+        margin-bottom: ((@line-height-computed) - (@tag-height-base/2));
+        padding: 0 10px 0 (@tag-height-base/2);
+        background: @tag-bg-color;
+        color: @tag-link-color;
+        text-decoration: none;
+        .border-right-radius(@tag-border-radius);
+
+        &:before {
+            content: "";
+            float: left;
+            position: absolute;
+            top: 0;
+            left: -(@tag-height-base/2);
+            width: 0;
+            height: 0;
+            border-color: transparent;
+            border-right-color: @tag-bg-color;
+            border-style: solid;
+            border-width: (@tag-height-base/2);
+            border-left-width: 0;
+        }
+        &:after {
+            content: "";
+            position: absolute;
+            top: (@tag-height-base - (@tag-height-base/6))/2;
+            left: 0;
+            float: left;
+            width: (@tag-height-base/6);
+            height: (@tag-height-base/6);
+            -moz-border-radius: 50%;
+            -webkit-border-radius: 50%;
+            border-radius: 50%;
+            background: #fff;
+        }
+        &:hover {
+            background-color: @tag-bg-hover-color;
+            &:before {
+                border-color: transparent @tag-bg-hover-color transparent transparent;
+            }
+            &:after {
+                background-color: lighten(@tag-bg-color, 30%);
+            }
+        }
+    }
+    &-sm {
+        > li > a.tag, a {
+            height: @tag-height-sm;
+            line-height: @tag-height-sm;
+        }
+        & a {
+            margin-bottom: (@line-height-computed - (@tag-height-sm/2));
+            padding: 0 10px 0 (@tag-height-sm/2);
+            &:before {
+                left: -(@tag-height-sm/2);
+                border-width: (@tag-height-sm/2);
+            }
+            &:after {
+                top: (@tag-height-sm - (@tag-height-sm/6))/2;
+                width: (@tag-height-sm/6);
+                height: (@tag-height-sm/6);
+            }
+        }
+    }
+    //=Tags sizes
+    &-lg {
+        > li > a, a {
+            height: @tag-height-lg;
+            line-height: @tag-height-lg;
+        }
+        & a {
+            margin-bottom: (@line-height-computed - (@tag-height-lg/2));
+            padding: 0 10px 0 (@tag-height-lg/2);
+            &:before {
+                left: -(@tag-height-lg/2);
+                border-width: (@tag-height-lg/2);
+            }
+            &:after {
+                top: (@tag-height-lg - (@tag-height-lg/6))/2;
+                width: (@tag-height-lg/6);
+                height: (@tag-height-lg/6);
+            }
+        }
+    }
+}

@@ -8,14 +8,14 @@ use yii\base\Model;
 class PasswordResetForm extends Model
 {
     public $password;
-    public $confirm;
+    public $password_repeat;
 
     public function rules()
     {
         return [
             ['password', 'required'],
             ['password', 'string', 'min' => 6, 'max' => 32],
-            ['confirm', 'compare', 'compareAttribute' => 'password']
+            ['password_repeat', 'compare', 'compareAttribute' => 'password']
         ];
     }
 
@@ -23,7 +23,7 @@ class PasswordResetForm extends Model
     {
         return [
             'password' => 'New Password',
-            'confirm' => 'Confirm new Password'
+            'password_repeat' => 'Confirm new Password'
         ];
     }
 

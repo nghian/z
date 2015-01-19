@@ -34,7 +34,9 @@ class UserLogin extends \yii\db\ActiveRecord
             [['user_id'], 'integer'],
             [['user_id', 'username'], 'unique'],
             [['user_id'], 'exist', 'targetClass' => '\common\models\User', 'targetAttribute' => 'id'],
-            [['username'], 'string', 'max' => 32],
+            ['username', 'filter', 'filter' => 'strtolower'],
+            [['username'], 'string', 'length' => [4, 32]],
+            ['username', 'match', 'pattern' => '/^[a-z0-9\.]+$/', 'message' => '{attribute} allows only letters (a-z), numbers, periods.'],
             [['password_hash', 'password_token'], 'string', 'max' => 100],
         ];
     }
@@ -89,6 +91,7 @@ class UserLogin extends \yii\db\ActiveRecord
     public function setResetToken()
     {
         $this->password_token = Yii::$app->security->generateRandomString() . '_' . time();
+
     }
 
     /**
@@ -97,7 +100,6 @@ class UserLogin extends \yii\db\ActiveRecord
     public function unsetResetToken()
     {
         $this->password_token = null;
+        return $this;
     }
-
-
 }

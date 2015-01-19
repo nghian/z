@@ -5,6 +5,7 @@ namespace common\models;
 use Yii;
 use yii\behaviors\SluggableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "article_category".
@@ -20,6 +21,10 @@ use yii\behaviors\TimestampBehavior;
  * Relations
  * @property ArticleCategory $parent
  * @property ArticleCategory[] $subs
+ *
+ * Shortcut
+ * @property array $url
+ * @property string $link
  */
 class ArticleCategory extends \yii\db\ActiveRecord
 {
@@ -103,5 +108,10 @@ class ArticleCategory extends \yii\db\ActiveRecord
     public function getUrl()
     {
         return ['/article/category', 'id' => $this->id, 'slug' => $this->slug];
+    }
+
+    public function getLink($options = [])
+    {
+        return Html::a($this->title, $this->getUrl(), $options);
     }
 }

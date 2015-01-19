@@ -10,7 +10,7 @@ class ChangePasswordForm extends Model
 {
     public $password;
     public $newPassword;
-    public $confirm;
+    public $password_repeat;
 
     public function rules()
     {
@@ -18,7 +18,7 @@ class ChangePasswordForm extends Model
             [['password', 'newPassword'], 'required'],
             ['password', 'validatePassword'],
             ['newPassword', 'string', 'min' => 6, 'max' => 32],
-            ['confirm', 'compare', 'compareAttribute' => 'newPassword']
+            ['password_repeat', 'compare', 'compareAttribute' => 'newPassword']
         ];
     }
 
@@ -27,7 +27,7 @@ class ChangePasswordForm extends Model
         return [
             'password' => 'Current password',
             'newPassword' => 'New password',
-            'confirm' => 'Confirm new password'
+            'password_repeat' => 'Confirm new password'
         ];
     }
 
