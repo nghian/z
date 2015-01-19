@@ -33,7 +33,7 @@ class ArticleController extends Controller
         return [
             [
                 'class' => ContentNegotiator::className(),
-                'only' => ['sub-category', 'like', 'comment-delete'],
+                'only' => ['sub-category', 'like', 'comment-delete', 'comment-like'],
                 'formats' => [
                     'application/json' => Response::FORMAT_JSON,
                 ]
@@ -252,6 +252,13 @@ class ArticleController extends Controller
         } else {
             return ['status' => false];
         }
+    }
+
+    public function actionCommentLike()
+    {
+        $id = Yii::$app->request->post('id');
+        $model = $this->loadComment($id);
+        return $model->like();
     }
 
     public function actionPrint($id)

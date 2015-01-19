@@ -78,10 +78,9 @@ class ArticleTag extends ActiveRecord
     public function getArticles()
     {
         return $this->hasMany(ArticleItem::className(), ['id' => 'article_id'])
-            ->viaTable(Article2Tag::tableName(), ['tag_id' => 'id'])->andWhere(['status' => ArticleItem::STATUS_PUBLISHED]);
+            ->viaTable(ArticleTagAssignment::tableName(), ['tag_id' => 'id'])->andWhere(['status' => ArticleItem::STATUS_PUBLISHED]);
 
     }
-
     /**
      * @return array
      */
@@ -170,7 +169,7 @@ class ArticleTag extends ActiveRecord
     public function addTag($name, $articleId)
     {
         if (is_integer($id = self::add($name))) {
-            return (new Article2Tag(['article_id' => $articleId, 'tag_id' => $id]))->save();
+            return (new ArticleTagAssignment(['article_id' => $articleId, 'tag_id' => $id]))->save();
         }
 
         return false;
@@ -202,7 +201,7 @@ class ArticleTag extends ActiveRecord
     public function removeTag($name, $articleId)
     {
         if (is_integer($id = self::remove($name))) {
-            return Article2Tag::deleteAll(['article_id' => $articleId, 'tag_id' => $id]);
+            return ArticleTagAssignment::deleteAll(['article_id' => $articleId, 'tag_id' => $id]);
         }
         return false;
     }

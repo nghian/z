@@ -62,6 +62,9 @@ bs = (function ($) {
     $('[data-toggle="ajax"]').click(function (e) {
         var el = jQuery(this);
         var ajaxOptions = $.extend({}, el.data());
+        if (!ajaxOptions.data) {
+            ajaxOptions.data = {};
+        }
         ajaxOptions.data[yii.getCsrfParam()] = yii.getCsrfToken();
         if (!ajaxOptions.url) {
             ajaxOptions.url = el.attr('href');
@@ -83,13 +86,18 @@ bs = (function ($) {
         };
         ajaxOptions.success = function (data, statusText, xhr) {
             if (data.status) {
-                if(data.callback){
+                if (data.callback) {
                     $.globalEval(data.callback);
                 }
                 if (data.replace) {
                     if (data.replace.data) {
                         $.each(data.replace.data, function (index, value) {
                             el.data(index, value);
+                        });
+                    }
+                    if (data.replace.attribute) {
+                        $.each(data.replace.attribute, function (index, value) {
+                            el.attr(index, value);
                         });
                     }
                     if (!data.replace.data || (data.replace.data && !data.replace.data.alert)) {

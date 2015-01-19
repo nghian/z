@@ -4,6 +4,7 @@ namespace common\models;
 
 use Yii;
 use yii\helpers\Html;
+
 /**
  * This is the model class for table "article_star".
  *
@@ -34,6 +35,8 @@ class ArticleLike extends \yii\db\ActiveRecord
         return [
             [['article_id', 'user_id'], 'required'],
             [['article_id', 'user_id'], 'integer'],
+            ['article_id', 'exist', 'targetClass' => '\common\models\Article', 'targetAttribute' => 'id'],
+            ['user_id', 'exist', 'targetClass' => '\common\models\User', 'targetAttribute' => 'id'],
             [['article_id', 'user_id'], 'unique', 'targetAttribute' => ['article_id', 'user_id'], 'message' => 'The combination of Article ID and User ID has already been taken.']
         ];
     }

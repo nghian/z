@@ -140,7 +140,7 @@ class ArticleItem extends ActiveRecord
      */
     public function getTags()
     {
-        return $this->hasMany(ArticleTag::className(), ['id' => 'tag_id'])->viaTable(Article2Tag::tableName(), ['article_id' => 'id']);
+        return $this->hasMany(ArticleTag::className(), ['id' => 'tag_id'])->viaTable(ArticleTagAssignment::tableName(), ['article_id' => 'id']);
     }
 
     /**

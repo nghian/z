@@ -9,8 +9,7 @@ use yii\helpers\Html;
 use yii\timeago\TimeAgo;
 use yii\widgets\ListView;
 use common\widgets\Button;
-use yii\helpers\Url;
-use yii\helpers\Json;
+
 
 $js = <<<JS
     jQuery('.comment-edit').click(function(event){
@@ -89,7 +88,7 @@ $this->params['breadcrumbs'] = $breadcrumbs;
             <div class="article-body"><?= $model->body; ?></div>
             <div class="article-tools">
                 <?= Html::a('<span class="psi-print"></span> Print', ['/article/print', 'id' => $model->id, 'slug' => $model->slug], ['class' => 'btn btn-xs btn-default']); ?>
-                <?=$model->getLikeButton();?>
+                <?= $model->getLikeButton(); ?>
                 <?= Html::a('<span class="psi-publish"></span> Publish', ['/article/publish', 'id' => $model->id, 'slug' => $model->slug], ['class' => 'btn btn-xs btn-default']); ?>
                 <?= Html::a('<span class="psi-warning"></span> Report', ['/article/report', 'id' => $model->id, 'slug' => $model->slug], ['class' => 'btn btn-xs btn-default']); ?>
                 <?= Html::a('<span class="psi-share"></span> Shares', ['/article/share', 'id' => $model->id, 'slug' => $model->slug], ['class' => 'btn btn-xs btn-default']); ?>
@@ -144,7 +143,8 @@ $this->params['breadcrumbs'] = $breadcrumbs;
                         'class' => 'comment'
                     ],
                     'layout' => "{items}\n{pager}",
-                    'options' => ['class' => 'comments']
+                    'options' => ['class' => 'comments'],
+                    'emptyText' => 'No comments found'
                 ]); ?>
                 <?php \yii\widgets\Pjax::end(); ?>
                 <?= $newComment; ?>
