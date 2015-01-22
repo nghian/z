@@ -55,6 +55,10 @@ class SiteController extends Controller
         return $this->render('about');
     }
 
+    public function actionPhpinfo()
+    {
+        phpinfo();
+    }
     public function actionTest()
     {
         $user = User::findOne(1);

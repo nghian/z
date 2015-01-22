@@ -4,12 +4,15 @@ namespace frontend\controllers;
 
 use common\behaviors\LayoutsBehavior;
 use common\models\UserLogin;
+use Imagine\Image\Box;
 use yii\data\ActiveDataProvider;
+use yii\imagine\Image;
 use yii\web\NotFoundHttpException;
+use Yii;
 
 class UserController extends \yii\web\Controller
 {
-    public $defaultAction = 'friend';
+    public $defaultAction = 'feed';
     private $_user;
 
     public function behaviors()
@@ -22,12 +25,6 @@ class UserController extends \yii\web\Controller
                 ]
             ]
         ];
-    }
-
-    public function actionView($username)
-    {
-        $model = $this->getUser($username);
-        return $this->render('view', ['model' => $model]);
     }
 
     public function actionArticle($username)
@@ -66,6 +63,16 @@ class UserController extends \yii\web\Controller
     {
         $model = $this->getUser($username);
         return $this->renderPartial('userInfo', ['model' => $model]);
+    }
+
+    public function actionPicture($username, $s = 200, $e = 'png')
+    {
+        $model = $this->getUser($username);
+        if (is_null($picture = $model->userProfile->picture)) {
+            $picture = Yii::getAlias('@webroot/images/avatars/avatar.' . ($model->id % 10) . '.png');
+        }
+        $imagine = new Image();
+        $imagine->getImagine()->open($picture)->resize(new Box($s,$s))->show($e);
     }
 
     public function getUser($username)

@@ -8,14 +8,16 @@ use common\models\ArticleItem;
 use common\models\ArticleLike;
 use common\models\ArticleTag;
 use yii\data\ActiveDataProvider;
+use yii\db\ActiveQuery;
 use yii\db\Expression;
-use yii\db\Query;
+use yii\elasticsearch\Query;
 use yii\filters\AccessControl;
 use yii\filters\ContentNegotiator;
 use yii\flash\Flash;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
+use yii\web\JsExpression;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use Yii;
@@ -33,7 +35,7 @@ class ArticleController extends Controller
         return [
             [
                 'class' => ContentNegotiator::className(),
-                'only' => ['sub-category', 'like', 'comment-delete', 'comment-like'],
+                'only' => ['sub-category', 'like', 'comment-update', 'comment-delete', 'comment-like'],
                 'formats' => [
                     'application/json' => Response::FORMAT_JSON,
                 ]
@@ -103,13 +105,12 @@ class ArticleController extends Controller
         ]);
     }
 
-    public function actionTagged($slug)
+    public function actionTagged($id)
     {
-        $model = $this->loadTag($slug);
+        $model = $this->loadTag($id);
         $dataProvider = new ActiveDataProvider([
             'query' => $model->getArticles()
         ]);
-        var_dump($model->articles);
         return $this->render('tagged', ['model' => $model, 'dataProvider' => $dataProvider]);
     }
 
@@ -190,15 +191,16 @@ class ArticleController extends Controller
         $model = $this->loadItem($id);
         $commentProvider = new ActiveDataProvider([
             'query' => ArticleComment::find()->where(['article_id' => $model->id, 'status' => ArticleComment::STATUS_APPROVED]),
-            'pagination' => [
-                'pageSize' => 20
+            'pagination' => false,
+            'sort' => [
+                'defaultOrder' => ['created_at' => SORT_ASC]
             ]
         ]);
         $model->updateCounters(['view_count' => 1]);
         return $this->render('view', [
             'model' => $model,
             'commentProvider' => $commentProvider,
-            'newComment' => $this->commentCreate($id)
+            'newComment' => $this->commentCreate($model->id)
         ]);
     }
 
@@ -227,31 +229,25 @@ class ArticleController extends Controller
             throw new ForbiddenHttpException('You are not allowed to access this page');
         }
         $model = $this->loadComment($id);
-        if ($model->load(Yii::$app->request->post())) {
-            if ($model->validate()) {
-                if ($model->save()) {
-                    Flash::alert(Flash::ALERT_SUCCESS, 'Your comment has been updated successfully.');
-                    $this->redirect($model->article->url);
-                    Yii::$app->end();
-                }
-            }
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return ['status' => true];
         } else {
-            return $this->renderAjax('comment/update', [
-                'model' => $model,
-            ]);
+            return ['status' => false, 'message' => array_shift(array_values($model->firstErrors))];
         }
     }
 
-    public function actionCommentDelete($id)
+    public function actionCommentDelete()
     {
-        if (!Yii::$app->user->can('delete', ['model' => $this->loadComment($id)])) {
-            throw new ForbiddenHttpException('You are not allowed to access this page');
+        $id = Yii::$app->request->post('id');
+        if ($id) {
+            if (!Yii::$app->user->can('delete', ['model' => $this->loadComment($id)])) {
+                throw new ForbiddenHttpException('You are not allowed to access this page');
+            }
+            if ($this->loadComment($id)->delete() > 0) {
+                return ['status' => true, 'callback' => "jQuery('.comment[data-key={$id}]').hide();"];
+            }
         }
-        if ($this->loadComment($id)->delete() > 0) {
-            return ['status' => true];
-        } else {
-            return ['status' => false];
-        }
+        return ['status' => false, 'alert' => ['message' => 'Unable to delete this comment.', 'type' => 'danger']];
     }
 
     public function actionCommentLike()
@@ -284,9 +280,82 @@ class ArticleController extends Controller
         return $this->renderAjax('report', ['model' => $this->loadItem($id)]);
     }
 
-    public function actionRss($id = null)
+    public function actionRss($id)
     {
+        $query = ArticleItem::find()
+            ->where(['status' => ArticleItem::STATUS_PUBLISHED])
+            ->andWhere(['<=', 'published_at', new Expression('UNIX_TIMESTAMP()')])
+            ->orderBy(['created_at' => SORT_DESC, 'updated_at' => SORT_DESC]);
+        if ($id) {
+            $query->andWhere(['cid' => $id]);
+        }
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 20
+            ]
+        ]);
+        return $this->render('rss', [
+            'dataProvider' => $dataProvider
+        ]);
+    }
 
+    public function popularTags()
+    {
+        $dataProvider = new ActiveDataProvider([
+            'query' => ArticleTag::find()->orderBy(['frequency' => SORT_DESC])
+        ]);
+        return $this->renderPartial('sidebar/tags', ['dataProvider' => $dataProvider]);
+    }
+
+    public function createButton()
+    {
+        return $this->renderPartial('sidebar/create');
+    }
+
+    public function searchForm()
+    {
+        return $this->renderPartial('sidebar/search');
+    }
+
+    public function listCategory($id)
+    {
+        $category = $this->loadCategory($id);
+        $dataProvider = new ActiveDataProvider([
+            'query' => $category->parent->getSubs()
+        ]);
+        return $this->renderPartial('sidebar/categories', ['dataProvider' => $dataProvider]);
+    }
+
+
+    public function relatedArticles($id, $keywords)
+    {
+        $dataProvider = new ActiveDataProvider([
+            'query' => $this->searchQuery($keywords)->andWhere(['!=', 'id', $id]),
+            'totalCount' => 10
+        ]);
+        return $this->renderPartial('sidebar/related', ['dataProvider' => $dataProvider]);
+    }
+
+    public function latestComments()
+    {
+        $query = ArticleComment::find()->groupBy(['article_id'])->orderBy(['created_at' => SORT_DESC]);
+        $dataProvider = new ActiveDataProvider(['query' => $query]);
+        return $this->renderPartial('sidebar/latest-comments', ['dataProvider' => $dataProvider]);
+    }
+
+
+    /**
+     * @param $keywords
+     * @return ActiveQuery
+     */
+    public function searchQuery($keywords)
+    {
+        $keywords = new Expression($keywords);
+        return ArticleItem::find()
+            ->select(['*', "relevance" => "MATCH (title) AGAINST ('$keywords' IN BOOLEAN MODE)"])
+            ->where("MATCH (title) AGAINST ('$keywords' IN BOOLEAN MODE)")
+            ->orderBy(['relevance' => SORT_DESC]);
     }
 
     /**
@@ -294,11 +363,11 @@ class ArticleController extends Controller
      * @return ArticleTag||null
      * @throws NotFoundHttpException
      */
-    protected function loadTag($slug)
+    protected function loadTag($id)
     {
         if (!$this->_tag) {
-            if (is_null($this->_tag = ArticleTag::findOne(['slug' => $slug]))) {
-                throw new NotFoundHttpException('This Tag was not found');
+            if (is_null($this->_tag = ArticleTag::findOne($id))) {
+                throw new NotFoundHttpException('This tag was not found');
             }
         }
         return $this->_tag;

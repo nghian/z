@@ -344,7 +344,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function getAvatarUrl($options = [])
     {
-        $params = ['avatar/picture', 'u' => $this->id];
+        $params = ['user/picture', 'username' => $this->userLogin->username];
         if (!empty($options)) {
             $params = array_merge($params, $options);
         }

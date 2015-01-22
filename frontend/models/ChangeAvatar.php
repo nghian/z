@@ -55,7 +55,7 @@ class ChangeAvatar extends Model
                 $imagine = $imagine->resize(new Box(400, 400));
             }
             if ($imagine->save(Yii::getAlias($this->avatarDir . DIRECTORY_SEPARATOR . $this->getFileName()))) {
-                if (Yii::$app->user->identity->userProfile->updateAttributes(['picture' => $this->getUrl()])) {
+                if (Yii::$app->user->identity->userProfile->updateAttributes(['picture' => $this->getResourceUrl()])) {
                     return true;
                 }
             }
@@ -71,9 +71,14 @@ class ChangeAvatar extends Model
         return $this->_fileName;
     }
 
+    public function getResourceUrl()
+    {
+        return Url::to(Yii::getAlias($this->avatarUrl) . '/' . $this->getFileName(), true);
+    }
+
     public function getUrl()
     {
-        return Url::to($this->avatarUrl . '/' . $this->getFileName(), true);
+        return Url::to(['user/picture', 'username' => Yii::$app->user->identity->userLogin->username, 's' => 214], true);
     }
 
 }

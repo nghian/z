@@ -94,7 +94,7 @@ class QaQuestion extends \yii\db\ActiveRecord
 
     public function reopen()
     {
-        $this->status = self::STATUS_CLOSED;
+        $this->status = self::STATUS_PUBLISHED;
         return $this;
     }
 

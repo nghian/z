@@ -169,7 +169,9 @@ class ArticleItem extends ActiveRecord
             'class' => 'btn btn-xs btn-default',
         ]);
         if (Yii::$app->user->isGuest) {
-            Html::a(Html::tag('span', null, ['class' => 'psi-thumb-up']) . ' Like', [Yii::$app->user->loginUrl, 'ref' => Yii::$app->request->absoluteUrl], $options);
+            return Html::button(Html::tag('span', null, ['class' => 'psi-thumb-up']) . ' Like', array_merge($options, [
+                'class' => 'btn btn-xs btn-default disabled',
+            ]));
         } else {
             $options = array_merge($options, [
                 'data-toggle' => 'ajax',
@@ -188,19 +190,23 @@ class ArticleItem extends ActiveRecord
     }
 
     /**
+     * @param array $params
      * @return array
      */
-    public function getUrl()
+    public function getUrl($params = [])
     {
-        return ['article/view', 'id' => $this->id, 'slug' => $this->slug];
+        return array_merge(['article/view', 'id' => $this->id, 'slug' => $this->slug], $params);
     }
 
     /**
+     * @param array $options
+     * @param array $params
      * @return string
      */
-    public function getLink()
+    public function getLink($options = [], $params = [])
     {
-        return Html::a($this->title, $this->getUrl(), ['title' => $this->title]);
+        $options['title'] = ArrayHelper::getValue($options, 'title', $this->title);
+        return Html::a($this->title, $this->getUrl($params), $options);
     }
 
     /**

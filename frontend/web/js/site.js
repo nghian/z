@@ -90,6 +90,8 @@ bs = (function ($) {
                     $.globalEval(data.callback);
                 }
                 if (data.replace) {
+                    el.removeData('alert');
+                    el.removeAttr('data-alert');
                     if (data.replace.data) {
                         $.each(data.replace.data, function (index, value) {
                             el.data(index, value);
@@ -99,9 +101,6 @@ bs = (function ($) {
                         $.each(data.replace.attribute, function (index, value) {
                             el.attr(index, value);
                         });
-                    }
-                    if (!data.replace.data || (data.replace.data && !data.replace.data.alert)) {
-                        el.removeData('alert');
                     }
                     if (data.replace.html) {
                         el.empty().html(data.replace.html);
@@ -131,6 +130,59 @@ bs = (function ($) {
             $.ajax(ajaxOptions);
         }
         e.preventDefault();
+    });
+    $('button[data-toggle="comment-edit"]').click(function (e) {
+        $(this).hide();
+        var key = $(this).data('key');
+        var target = $('.comment-detail-body[data-key=' + key + ']');
+        target.after($('<div/>', {
+            'data-key': key,
+            'style': 'display:none'
+        }).addClass('comment-body-history').html(target.html()));
+        target.redactor({
+            iframe: true,
+            initCallback: function () {
+                this.selection.restore();
+                $('.comment-detail-tools[data-key=' + key + ']').show();
+            }
+        });
+    });
+    $('button[data-toggle="comment-update"]').click(function (e) {
+        var key = $(this).data('key');
+        var target = $('.comment-detail-body[data-key=' + key + ']');
+        var postField = {};
+        postField['ArticleComment[body]'] = target.redactor('code.get');
+        postField[yii.getCsrfParam()] = yii.getCsrfToken();
+        $.ajax({
+            url: '/article/comment-update?id=' + key,
+            type: 'POST',
+            data: postField,
+            dataType: 'json',
+            cache: false,
+            success: function (json) {
+                if (!json.status) {
+                    bs.alert(json.message, 'warning');
+                } else {
+                    target.redactor('core.destroy');
+                    $('.comment-detail-tools[data-key=' + key + ']').hide();
+                    $('button[data-key=' + key + ']').show();
+                }
+            },
+            error: function (code, message) {
+                bs.alert('Unable to update this comment', 'danger');
+            }
+        });
+    });
+    $('button[data-toggle="comment-cancel"]').click(function (e) {
+        var key = $(this).data('key');
+        var target = $('.comment-detail-body[data-key=' + key + ']');
+        target.redactor('core.destroy');
+        target.html($('.comment-body-history[data-key=' + key + ']').html());
+        $('.comment-detail-tools[data-key=' + key + ']').hide();
+        $('button[data-key=' + key + ']').show();
+    });
+    $('button[data-toggle="comment-delete"]').click(function (e) {
+
     });
 })
 (jQuery);

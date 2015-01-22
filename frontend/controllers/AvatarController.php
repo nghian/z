@@ -13,15 +13,6 @@ class AvatarController extends Controller
 {
     public $defaultImagePath = '@webroot/images/avatars';
 
-    public function actionPicture($u, $s = 200, $e = 'png')
-    {
-        $id = intval($u);
-        if (is_null($user = User::findOne($id)) || is_null($picture = $user->userProfile->picture)) {
-            $picture = Yii::getAlias($this->defaultImagePath) . '/avatar.' . ($id % 10) . '.png';
-        }
-        (new Image())->getImagine()->open($picture)->resize(new Box($s, $s))->show('png');
-    }
-
     public function actionChange()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;

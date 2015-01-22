@@ -34,10 +34,9 @@ return [
                 'account/authorize/<client:\w+>' => 'account/authorize',
                 'user/<username:[a-z0-9\-\.]+>' => 'user/article',
                 'user/<username:[a-z0-9\-\.]+>/<action:[a-z0-9\-]+>' => 'user/<action>',
-                'avatar/<u:\d+>/picture.jpg' => 'avatar/picture',
                 '<controller:[a-z0-9\-]+>/<id:\d+>-<slug:[a-z0-9\-]+>' => '<controller>/category',
                 '<controller:[a-z0-9\-]+>/<id:\d+>-<slug:[a-z0-9\-]+>.html' => '<controller>/view',
-                '<controller:[a-z0-9\-]+>/<id:\d+>-<slug:[a-z0-9\-]+>/<action:[a-z0-9\-]+>' => '<controller>/<action>'
+                '<controller:[a-z0-9\-]+>/<action:[a-z0-9\-]+>/<id:\d+>-<slug:[a-z0-9\-]+>' => '<controller>/<action>'
             ]
         ],
         'errorHandler' => [

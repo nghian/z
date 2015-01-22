@@ -81,12 +81,13 @@ class ArticleTag extends ActiveRecord
             ->viaTable(ArticleTagAssignment::tableName(), ['tag_id' => 'id'])->andWhere(['status' => ArticleItem::STATUS_PUBLISHED]);
 
     }
+
     /**
      * @return array
      */
     public function getUrl()
     {
-        return ['/article/tagged', 'slug' => $this->slug];
+        return ['/article/tagged', 'id' => $this->id, 'slug' => $this->slug];
     }
 
     /**

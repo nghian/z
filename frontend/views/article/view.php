@@ -10,54 +10,6 @@ use yii\timeago\TimeAgo;
 use yii\widgets\ListView;
 use common\widgets\Button;
 
-
-$js = <<<JS
-    jQuery('.comment-edit').click(function(event){
-        var that = this,target = jQuery('#discussion-form');
-        jQuery.ajax({
-            url:jQuery(that).attr('data-action'),
-            beforeSend:function(){
-                jQuery(that).find('i').addClass('psi-spin psi-spinner9');
-            },
-            complete:function(){
-                jQuery(that).find('i').removeClass('psi-spin psi-spinner9');
-            },
-            success:function(data){
-                target.html(data);
-                jQuery("html, body").scrollTop(target.offset().top);
-            },
-            error:function(){
-                yii.alert.show('Unable to load form', 'danger');
-            }
-        });
-        event.preventDefault();
-    });
-    jQuery('.comment-delete').click(function(event){
-        var that = this,target = jQuery(this).closest('.comment');
-        jQuery.ajax({
-            url:jQuery(that).attr('data-action'),
-            beforeSend:function(){
-                jQuery(that).find('i').toggleClass('psi-spin psi-spinner9');
-            },
-            complete:function(){
-                jQuery(that).find('i').toggleClass('psi-spin psi-spinner9');
-            },
-            success:function(data){
-                if(data.status){
-                    target.remove();
-                }else{
-                    alert('Unable to delete this comment');
-                }
-            },
-            error:function(){
-                yii.alert.show('Unable to load', 'danger');
-            }
-        });
-        event.preventDefault();
-    });
-
-JS;
-$this->registerJs($js);
 $this->title = $model->title;
 if ($model->category->parent) {
     $breadcrumbs = [
@@ -87,12 +39,14 @@ $this->params['breadcrumbs'] = $breadcrumbs;
             <div class="article-summary"><?= $model->summary; ?></div>
             <div class="article-body"><?= $model->body; ?></div>
             <div class="article-tools">
+                <?php if (!Yii::$app->user->can('update', ['model' => $model])): ?>
+                    <?= $model->getLikeButton(); ?>
+                    <?= Html::a('<span class="psi-warning"></span> Report', ['/article/report', 'id' => $model->id, 'slug' => $model->slug], ['class' => 'btn btn-xs btn-default']); ?>
+                <?php endif; ?>
                 <?= Html::a('<span class="psi-print"></span> Print', ['/article/print', 'id' => $model->id, 'slug' => $model->slug], ['class' => 'btn btn-xs btn-default']); ?>
-                <?= $model->getLikeButton(); ?>
                 <?= Html::a('<span class="psi-publish"></span> Publish', ['/article/publish', 'id' => $model->id, 'slug' => $model->slug], ['class' => 'btn btn-xs btn-default']); ?>
-                <?= Html::a('<span class="psi-warning"></span> Report', ['/article/report', 'id' => $model->id, 'slug' => $model->slug], ['class' => 'btn btn-xs btn-default']); ?>
-                <?= Html::a('<span class="psi-share"></span> Shares', ['/article/share', 'id' => $model->id, 'slug' => $model->slug], ['class' => 'btn btn-xs btn-default']); ?>
-                <?= Html::a('<span class="psi-email"></span> Email', ['/article/share', 'id' => $model->id, 'slug' => $model->slug], ['class' => 'btn btn-xs btn-default']); ?>
+                <?= Html::a('<span class="psi-email"></span> Email', ['/article/email', 'id' => $model->id, 'slug' => $model->slug], ['class' => 'btn btn-xs btn-default']); ?>
+                <?= Html::a('<span class="psi-share"></span> Share', ['/article/share', 'id' => $model->id, 'slug' => $model->slug], ['class' => 'btn btn-xs btn-default']); ?>
             </div>
             <div class="author article-author">
                 <div class="author-avatar">
@@ -108,15 +62,11 @@ $this->params['breadcrumbs'] = $breadcrumbs;
                         </div>
                     </div>
                     <div class="author-footer">
-                        <?= Button::widget([
-                            'controller' => 'follow',
+                        <?= Button::widget(['controller' => 'follow',
                             'model' => $model->user,
-                            'labelIcon' => 'psi-user-check'
-                        ]); ?>
-                        <?= Button::widget([
-                            'controller' => 'friend',
-                            'model' => $model->user,
-                        ]); ?>
+                            'labelIcon' => 'psi-user-check']); ?>
+                        <?= Button::widget(['controller' => 'friend',
+                            'model' => $model->user,]); ?>
                     </div>
                 </div>
             </div>
@@ -133,25 +83,23 @@ $this->params['breadcrumbs'] = $breadcrumbs;
                 <h3><span class="psi-comment"></span> Comments</h3>
             </div>
             <div class="discussion-body">
-                <?php \yii\widgets\Pjax::begin([
-                    'timeout' => 2000
-                ]); ?>
-                <?= ListView::widget([
-                    'dataProvider' => $commentProvider,
+                <?php \yii\widgets\Pjax::begin(['timeout' => 2000]); ?>
+                <?= ListView::widget(['dataProvider' => $commentProvider,
                     'itemView' => 'comment/item',
-                    'itemOptions' => [
-                        'class' => 'comment'
-                    ],
+                    'itemOptions' => ['class' => 'comment'],
                     'layout' => "{items}\n{pager}",
                     'options' => ['class' => 'comments'],
-                    'emptyText' => 'No comments found'
-                ]); ?>
+                    'emptyText' => 'No comments found']); ?>
                 <?php \yii\widgets\Pjax::end(); ?>
                 <?= $newComment; ?>
             </div>
         </div>
     </div>
     <div class="col-sm-4">
-        //todo
+        <?= $this->context->createButton(); ?>
+        <?= $this->context->searchForm(); ?>
+        <?= $this->context->listCategory($model->cid); ?>
+        <?= $this->context->relatedArticles($model->id, $model->title); ?>
+        <?=$this->context->latestComments();?>
     </div>
 </div>

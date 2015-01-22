@@ -146,7 +146,7 @@ class ArticleComment extends \yii\db\ActiveRecord
     {
         $options = array_merge($options, ['class' => 'btn btn-xs btn-success']);
         if (Yii::$app->user->isGuest) {
-            return Html::a(Html::tag('span', null, ['class' => 'psi-thumb-up']) . ' Like', [Yii::$app->user->loginUrl, 'ref' => Yii::$app->request->absoluteUrl], $options);
+            return Html::button(Html::tag('span', null, ['class' => 'psi-thumb-up']) . ' Like', array_merge($options, ['title' => 'Please, login to like comment']));
         } else {
             $options = array_merge($options, [
                 'data-toggle' => 'ajax',
